@@ -94,13 +94,7 @@ export default function VoiceChangerTool() {
 
   const startRecording = async () => {
     try {
-      let stream: MediaStream;
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
-      } catch (constraintErr) {
-        console.warn("Strict audio constraints rejected, falling back to basic audio: true", constraintErr);
-        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      }
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorderRef.current = new MediaRecorder(stream);
       chunksRef.current = [];
 
