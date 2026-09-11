@@ -3,11 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Mic2, Music, CircleDot, HelpCircle, Menu, X, MessageCircle } from "lucide-react";
+import { Mic2, Music, CircleDot, HelpCircle, Menu, X, MessageCircle, Moon, Sun } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 
 export function Sidebar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   const tools = [
     { name: "Karaoke", href: "/karaoke", icon: Mic2, disabled: false },
@@ -66,6 +68,13 @@ export function Sidebar() {
         </div>
 
         <div className="mt-auto flex flex-col gap-2 pb-6">
+          <button
+            onClick={toggleTheme}
+            className="flex flex-col items-center justify-center p-3 transition-colors relative text-muted hover:text-foreground hover:bg-control/10"
+          >
+            {theme === 'dark' ? <Sun className="w-6 h-6 mb-1" /> : <Moon className="w-6 h-6 mb-1" />}
+            <span className="text-[10px] text-center leading-tight">Theme</span>
+          </button>
           {bottomLinks.map((link) => {
             const Icon = link.icon;
             const isActive = pathname === link.href;
@@ -121,6 +130,16 @@ export function Sidebar() {
           <div className="flex-1 overflow-y-auto p-4">
             <div className="grid grid-cols-2 gap-4">
               {/* Combine tools and bottom links for mobile grid */}
+              <button
+                onClick={() => {
+                  toggleTheme();
+                  setMobileMenuOpen(false);
+                }}
+                className="flex flex-col items-center justify-center p-6 rounded-xl border transition-all h-[150px] border-edge/20 bg-panel text-foreground hover:border-edge/60"
+              >
+                {theme === 'dark' ? <Sun className="w-10 h-10 mb-3" /> : <Moon className="w-10 h-10 mb-3" />}
+                <span className="font-medium text-center">Toggle Theme</span>
+              </button>
               {[...tools, ...bottomLinks].map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href;

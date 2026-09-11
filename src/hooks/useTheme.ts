@@ -10,9 +10,7 @@ function getSavedTheme(): Theme {
   if (typeof window === 'undefined') return 'dark';
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved === 'light' || saved === 'dark') return saved;
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-    return 'light';
-  }
+  // Always default to dark mode as requested
   return 'dark';
 }
 
