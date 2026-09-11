@@ -17,20 +17,8 @@ export function useAudioRecorder() {
   const prepareRecording = useCallback(async (): Promise<boolean> => {
     if (streamRef.current) return true;
     try {
-      let stream: MediaStream;
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            echoCancellation: false,
-            noiseSuppression: false,
-            autoGainControl: false,
-          },
-        });
-      } catch (constraintErr) {
-        // Fallback for strict mobile browsers that reject specific audio constraints
-        console.warn("Strict audio constraints rejected, falling back to basic audio: true", constraintErr);
-        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      }
+      // Use the absolute simplest audio request to ensure the browser popup triggers.
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
       
       const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
