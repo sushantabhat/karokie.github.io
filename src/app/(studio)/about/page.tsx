@@ -1,3 +1,9 @@
+import { Metadata } from 'next';
+export const metadata: Metadata = {
+  title: 'About Audio Studio - Privacy-First Audio Tools',
+  description: 'Learn about our 100% private, browser-based audio suite. All processing happens locally on your device.',
+};
+
 export default function AboutPage() {
   return (
     <main className="h-full overflow-y-auto bg-neutral-50 dark:bg-[#0b0f17] text-neutral-900 dark:text-neutral-100 transition-colors duration-200">

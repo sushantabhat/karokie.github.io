@@ -370,7 +370,7 @@ export default function VoiceChangerTool() {
           <div>
             <h1 className="text-2xl md:text-3xl font-black text-foreground flex items-center gap-3">
               <Sparkles className="w-6 h-6 text-[#38bdf8]" />
-              Voice Changer
+              Voice Changer<span className="sr-only"> & Audio Effects Recorder</span>
             </h1>
             <p className="text-secondary mt-1">Record your voice and apply fun effects instantly.</p>
           </div>

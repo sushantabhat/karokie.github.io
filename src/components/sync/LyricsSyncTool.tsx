@@ -326,7 +326,8 @@ export function LyricsSyncTool() {
         <div className="text-center max-w-md w-full space-y-8">
           <div>
             <Music className="w-16 h-16 mx-auto mb-6 text-foreground opacity-80" />
-            <h1 className="text-3xl font-bold mb-3">Lyrics Sync Tool</h1>
+            <h1 className="text-3xl font-bold mb-3">Lyrics Sync Tool <span className="sr-only">- LRC File Creator</span></h1>
+            <h2 className="sr-only">Tap to Sync Lyrics to Audio</h2>
             <p className="text-muted text-lg mb-2">Sync lyrics to any audio track.</p>
             <p className="text-muted">Export as .lrc for karaoke use.</p>
           </div>

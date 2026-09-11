@@ -1180,7 +1180,7 @@ export default function KaraokeStudio() {
         <div className="flex items-center justify-between gap-3 md:gap-6 z-10">
           <h1 className="text-base md:text-lg font-black tracking-tighter text-foreground flex items-center gap-2">
             <Mic2 className="w-5 h-5 text-foreground" />
-            <span className="hidden md:inline">KARAOKE STUDIO</span><span className="inline md:hidden">KARAOKE</span>
+            <span className="hidden md:inline">KARAOKE STUDIO</span><span className="inline md:hidden">KARAOKE</span><span className="sr-only"> - Free Online Vocal Recorder & Audio Mixer</span>
           </h1>
           
           <div className="hidden md:block h-6 w-px bg-control" />
@@ -1316,6 +1316,7 @@ export default function KaraokeStudio() {
             )}
             
             {/* TELEPROMPTER */}
+            <h2 className="sr-only">Lyrics Teleprompter & Sync</h2>
             {lyrics.some(l => l.start !== null) && (
               (() => {
                 let currentIdx = -1;
@@ -1418,6 +1419,7 @@ export default function KaraokeStudio() {
             )}
 
           
+          <h2 className="sr-only">Audio Mixer, Reverb & Vocal Separation</h2>
           {/* MOBILE MIXER TOGGLE */}
           <div className="md:hidden w-full flex justify-center mt-2 mb-2">
             <button 
