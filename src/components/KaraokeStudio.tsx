@@ -390,7 +390,7 @@ export default function KaraokeStudio() {
     const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
     if (finishedStatuses.includes(status)) {
       setRunTour(false);
-      localStorage.setItem('hasSeenTour', 'true');
+      localStorage.setItem('hasSeenTour_v3', 'true');
     }
   };
 
@@ -398,10 +398,16 @@ export default function KaraokeStudio() {
 
   useEffect(() => {
     setIsMounted(true);
-    if (!localStorage.getItem('hasSeenTour')) {
-      setTimeout(() => setRunTour(true), 1500);
-    }
   }, []);
+
+  // Trigger tour only AFTER they upload a track for the first time
+  useEffect(() => {
+    if (trackFile && isMounted) {
+      if (!localStorage.getItem('hasSeenTour_v3')) {
+        setTimeout(() => setRunTour(true), 500);
+      }
+    }
+  }, [trackFile, isMounted]);
 
   // ==== Export .LRC ====
   const formatLRC = () => {
@@ -1128,6 +1134,7 @@ export default function KaraokeStudio() {
       )}
 
       {/* HEADER */}
+      {trackFile && (
       <header className="shrink-0 flex flex-col md:flex-row md:items-center md:justify-between border-b border-edge/20 light:border-edge bg-panel px-3 md:px-8 py-2 md:py-0 md:h-14 gap-2 md:gap-0 shadow-sm z-10 overflow-hidden">
         
         {/* LEFT SIDE: Brand & Tabs */}
@@ -1225,9 +1232,12 @@ export default function KaraokeStudio() {
         </div>
 
         {/* Hidden file inputs */}
-        <input type="file" accept="audio/*,video/*" className="hidden" id="file-upload" onChange={handleTrackUpload} />
-        <input type="file" accept=".lrc,.srt,.vtt" className="hidden" id="lrc-upload" onChange={handleLRCUpload} />
       </header>
+      )}
+
+      {/* Hidden file inputs moved out of header so they still work when header is hidden */}
+      <input type="file" accept="audio/*,video/*" className="hidden" id="file-upload" onChange={handleTrackUpload} />
+      <input type="file" accept=".lrc,.srt,.vtt" className="hidden" id="lrc-upload" onChange={handleLRCUpload} />
 
       {/* TIMELINE AREA */}
       <div className={`flex-1 min-h-0 ${activeTab === 'MIXER' ? 'p-3 md:p-8 overflow-y-auto' : 'p-2 md:p-4 lg:p-8 flex flex-col overflow-hidden min-h-0'}`}>
