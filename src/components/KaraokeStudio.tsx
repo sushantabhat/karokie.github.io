@@ -258,24 +258,12 @@ export default function KaraokeStudio() {
       placement: 'bottom',
       spotlightPadding: 8,
     },
-    {
-      target: '.tour-step-stop',
-      content: (
-        <div className="text-left flex flex-col gap-1">
-          <strong className="text-base">3. Stop & Listen ⏹️</strong>
-          <span className="text-sm opacity-90">When you are done recording, hit the Stop button to finish the take and listen back!</span>
-          <span className="text-[11px] opacity-70 mt-1 italic">Pro tip: You can use the Play/Pause button to pause mid-take!</span>
-        </div>
-      ),
-      skipBeacon: true,
-      placement: 'bottom',
-      spotlightPadding: 8,
-    },
+
     {
       target: '.tour-step-4',
       content: (
         <div className="text-left flex flex-col gap-1">
-          <strong className="text-base">4. Final Polish ✨</strong>
+          <strong className="text-base">3. Final Polish ✨</strong>
           <span className="text-sm opacity-90">Toggle on Studio Reverb, adjust your mix volumes, and hit Export to save your masterpiece!</span>
         </div>
       ),
@@ -1199,31 +1187,21 @@ export default function KaraokeStudio() {
                 title={isRecording ? "Pause/Resume Recording" : "Play/Pause"}
               >
                 {(isPlaying || (isRecording && !isRecPaused)) ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current" />}
-                {(isPlaying || (isRecording && !isRecPaused)) ? "PAUSE" : "PLAY AUDIO"}
+                {(isPlaying || (isRecording && !isRecPaused)) ? "PAUSE" : "PREVIEW MIX"}
               </button>
 
               <button 
-                onClick={handleStartRecording}
-                disabled={isRecording || isPlaying || !trackFile || activeTab === "SYNC"}
+                onClick={isRecording ? handleStopClick : handleStartRecording}
+                disabled={isPlaying || !trackFile || activeTab === "SYNC"}
                 className={`tour-step-2 px-4 py-2 rounded-full flex items-center justify-center gap-2 transition-all font-bold text-xs whitespace-nowrap ${
                   isRecording 
-                    ? 'bg-transparent border-2 border-[#ef4444] shadow-[0_0_15px_rgba(239,68,68,0.7)] animate-pulse' 
+                    ? 'bg-transparent border-2 border-[#ef4444] text-[#ef4444] shadow-[0_0_15px_rgba(239,68,68,0.7)] animate-pulse' 
                     : 'bg-transparent text-[#ef4444] hover:bg-control hover:bg-[#ef4444]/10 disabled:opacity-50 disabled:pointer-events-none'
                 }`}
                 title="Record"
               >
-                <div className={`rounded-full transition-all ${isRecording ? 'w-3 h-3 bg-[#ef4444]' : 'w-3 h-3 bg-[#ef4444]'}`} />
-                {isRecording ? "RECORDING..." : "START RECORDING"}
-              </button>
-
-              <button 
-                onClick={handleStopClick}
-                disabled={!isRecording && !isPlaying && currentTime === 0}
-                className="tour-step-stop px-4 py-2 rounded-full bg-transparent text-muted hover:bg-control hover:text-foreground flex items-center justify-center gap-2 transition-colors font-bold text-xs whitespace-nowrap disabled:opacity-50 disabled:pointer-events-none"
-                title="Stop"
-              >
-                <Square className="w-3 h-3 fill-current" />
-                STOP
+                {isRecording ? <Square className="w-3 h-3 fill-current" /> : <div className="w-3 h-3 rounded-full bg-[#ef4444]" />}
+                {isRecording ? "STOP RECORDING" : "START RECORDING"}
               </button>
             </div>
 
