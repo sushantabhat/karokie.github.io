@@ -229,6 +229,7 @@ const saveLyricsToLocalStorage = (hash: string, ly: LineSync[]) => {
 
 export default function KaraokeStudio() {
   const [trackFile, setTrackFile] = useState<File | null>(null);
+  const isVideo = trackFile && trackFile.type.startsWith('video/');
   const [trackUrl, setTrackUrl] = useState<string | null>(null);
   const [headphonesConfirmed, setHeadphonesConfirmed] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
@@ -311,7 +312,7 @@ export default function KaraokeStudio() {
   const [isPainting, setIsPainting] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioRef = useRef<any>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const punchInTimeRef = useRef<number>(0);
   const previewStartTimeRef = useRef<number>(0);
@@ -466,26 +467,57 @@ export default function KaraokeStudio() {
       reader.onload = (ev) => {
         let absIdx = 0;
         const text = ev.target?.result as string;
-        const parsed = text
-          .split('\n')
-          .map((line) => {
-            const match = line.match(/\[(\d+):(\d{2}\.\d{2})\](.*)/);
+        let parsed: LineSync[] = [];
+        const lines = text.split('\n').map(l => l.trim());
+        
+        if (text.includes('-->')) {
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            if (line.includes('-->')) {
+              const timeMatch = line.match(/(?:(\d{2}):)?(\d{2}):(\d{2})[,.](\d{3})\s*-->\s*(?:(\d{2}):)?(\d{2}):(\d{2})[,.](\d{3})/);
+              if (timeMatch) {
+                const h1 = parseInt(timeMatch[1] || '0', 10);
+                const m1 = parseInt(timeMatch[2], 10);
+                const s1 = parseInt(timeMatch[3], 10);
+                const ms1 = parseInt(timeMatch[4], 10);
+                const start = h1 * 3600 + m1 * 60 + s1 + ms1 / 1000;
+                
+                let txt = '';
+                let j = i + 1;
+                while (j < lines.length && lines[j] !== '' && !lines[j].match(/^\d+$/)) {
+                  txt += (txt ? ' ' : '') + lines[j];
+                  j++;
+                }
+                
+                if (txt) {
+                  parsed.push({
+                    id: "line-" + Date.now() + "-" + Math.random(),
+                    text: txt,
+                    start: start,
+                    end: null
+                  });
+                }
+                i = j - 1;
+              }
+            }
+          }
+        } else {
+          parsed = lines.map((line) => {
+            const match = line.match(/\[(\d+):(\d{2}\.\d{2,3})\](.*)/);
             if (match) {
               const mins = parseInt(match[1], 10);
               const secs = parseFloat(match[2]);
               const time = mins * 60 + secs;
               const txt = match[3].trim();
-              const words = txt.split(/\s+/).filter(w => w).map(w => ({ text: w, start: null, end: null, absoluteIdx: absIdx++ }));
               return { id: "line-" + Date.now() + "-" + Math.random(), text: txt, start: time, end: null } as LineSync;
             }
             const txt = line.trim();
             if (txt) {
-               const words = txt.split(/\s+/).filter(w => w).map(w => ({ text: w, start: null, end: null, absoluteIdx: absIdx++ }));
                return { id: "line-" + Date.now() + "-" + Math.random(), text: txt, start: null, end: null } as LineSync;
             }
             return null;
-          })
-          .filter((l): l is LineSync => l !== null && l.text !== '');
+          }).filter((l): l is LineSync => l !== null && l.text !== '');
+        }
         setLyrics(parsed);
         // Show a toast indicating LRC loaded
         setAutoSaved(true);
@@ -527,8 +559,12 @@ export default function KaraokeStudio() {
       if (!takeMode) return; // cancelled
       
       if (takeMode === "continue") {
-        punchInTimeRef.current = vocalBuffer.duration;
-        setCurrentTime(vocalBuffer.duration);
+        // If they seeked, use that time. Otherwise append to the end.
+        const startTime = (currentTime > 0 && currentTime < vocalBuffer.duration) 
+          ? currentTime 
+          : vocalBuffer.duration;
+        punchInTimeRef.current = startTime;
+        setCurrentTime(startTime);
         isContinueTake = true;
       } else {
         clearVocal();
@@ -651,6 +687,30 @@ export default function KaraokeStudio() {
     }
     return () => clearInterval(interval);
   }, [isRecording, isRecPaused, isPlaying, isSyncSessionActive, activeTab, stopPreview, getPlaybackPosition]); 
+
+  // Sync Video playback with isPlaying and isRecording
+  useEffect(() => {
+    if (!audioRef.current || !isVideo) return;
+    
+    if (isPlaying || isRecording) {
+      // Sync the time before playing just to be perfectly aligned
+      if (Math.abs(audioRef.current.currentTime - currentTime) > 0.3) {
+        audioRef.current.currentTime = currentTime;
+      }
+      
+      // If previewing, we want the video muted because useAudioMixer handles the actual audio buffer!
+      // If recording, useAudioMixer doesn't play the buffer, so the video MUST provide the audio.
+      if (isPlaying && !isRecording) {
+        audioRef.current.volume = 0;
+      } else if (isRecording) {
+        audioRef.current.volume = Math.min(mixSettings.trackVolume / 100, 1);
+      }
+      
+      audioRef.current.play().catch((e: any) => console.error("Video auto-play error:", e));
+    } else {
+      audioRef.current.pause();
+    }
+  }, [isPlaying, isRecording, isVideo]); // purposely omitting currentTime to avoid stuttering on every tick
 
   // Visualizer loop
   useEffect(() => {
@@ -852,6 +912,12 @@ export default function KaraokeStudio() {
   const startPlayback = (timeOffset: number) => {
     previewStartTimeRef.current = performance.now();
     previewStartOffsetRef.current = timeOffset;
+    
+    if (audioRef.current && isVideo) {
+      audioRef.current.currentTime = timeOffset;
+      audioRef.current.play().catch((e: any) => console.error("Video sync play error:", e));
+    }
+    
     playPreview({
       ...mixSettings,
       trackVolume: effectiveTrackVolume,
@@ -862,6 +928,10 @@ export default function KaraokeStudio() {
   const handleSeekEnd = (time: number) => {
     if (isRecording) return;
     setCurrentTime(time);
+    
+    if (isVideo && audioRef.current) {
+       audioRef.current.currentTime = time;
+    }
     
     if (wasPlayingBeforeDrag.current) {
       startPlayback(time);
@@ -919,6 +989,7 @@ export default function KaraokeStudio() {
     if (isRecording) {
       handlePauseResumeRecording();
     } else if (isPlaying) {
+      if (audioRef.current && isVideo) audioRef.current.pause();
       stopPreview();
     } else {
       handlePlayPreviewClick();
@@ -1139,7 +1210,7 @@ export default function KaraokeStudio() {
               className="tour-step-3 px-3 md:px-5 py-1.5 rounded-full text-xs font-medium transition-all bg-seg-active text-foreground font-semibold shadow-sm hover:text-foreground flex items-center gap-2"
             >
               <FileText className="w-4 h-4 text-[#38bdf8]" />
-              Import .LRC Lyrics
+              Import Lyrics (.LRC, .SRT, .VTT)
             </button>
           </div>
         </div>
@@ -1232,14 +1303,56 @@ export default function KaraokeStudio() {
         </div>
 
         {/* Hidden file inputs */}
-        <input type="file" accept="audio/*" className="hidden" id="file-upload" onChange={handleTrackUpload} />
-        <input type="file" accept=".lrc" className="hidden" id="lrc-upload" onChange={handleLRCUpload} />
+        <input type="file" accept="audio/*,video/*" className="hidden" id="file-upload" onChange={handleTrackUpload} />
+        <input type="file" accept=".lrc,.srt,.vtt" className="hidden" id="lrc-upload" onChange={handleLRCUpload} />
       </header>
 
       {/* TIMELINE AREA */}
       <div className={`flex-1 min-h-0 ${activeTab === 'MIXER' ? 'p-3 md:p-8 overflow-y-auto' : 'p-2 md:p-4 lg:p-8 flex flex-col overflow-hidden min-h-0'}`}>
         {activeTab === 'MIXER' ? (
+          !trackFile ? (
+            <div className="flex flex-col items-center justify-center h-full min-h-[60vh] max-w-md mx-auto text-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="w-24 h-24 rounded-full bg-[#38bdf8]/10 flex items-center justify-center mb-4">
+                <Mic2 className="w-12 h-12 text-[#38bdf8]" />
+              </div>
+              <h2 className="text-3xl font-black tracking-tight text-foreground">Ready to sing?</h2>
+              <p className="text-secondary mb-4">Upload an instrumental track or a karaoke video to get started.</p>
+              
+              <button
+                onClick={() => document.getElementById('file-upload')?.click()}
+                className="w-full py-4 bg-[#38bdf8] hover:bg-[#38bdf8]/90 text-black rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-3"
+              >
+                <Upload className="w-5 h-5" />
+                Choose File
+              </button>
+              <p className="text-xs font-medium text-muted mt-2">Supports .mp3, .wav, .mp4, .webm</p>
+            </div>
+          ) : (
           <div className="max-w-6xl mx-auto space-y-6">
+            
+            {/* VIDEO PLAYER */}
+            {isVideo && trackUrl && (
+              <div className="w-full bg-black rounded-xl overflow-hidden shadow-sm flex items-center justify-center border border-edge/20 light:border-edge relative group">
+                <video
+                  ref={audioRef}
+                  src={trackUrl}
+                  playsInline
+                  muted={!isRecording}
+                  preload="auto"
+                  className="w-full max-h-[50vh] md:max-h-[60vh] object-contain bg-black"
+                  onEnded={() => {
+                    if (isRecording) {
+                      handleStopRecording();
+                    }
+                  }}
+                  onLoadedData={() => {
+                    if (audioRef.current && !isPlaying && !isRecording) {
+                      audioRef.current.currentTime = 0;
+                    }
+                  }}
+                />
+              </div>
+            )}
             
             {/* TELEPROMPTER */}
             {lyrics.some(l => l.start !== null) && (
@@ -1437,7 +1550,7 @@ export default function KaraokeStudio() {
                   >
                     Click to Load Instrumental Track
                   </button>
-                  <input id="file-upload" type="file" accept="audio/*" onChange={handleTrackUpload} className="hidden" />
+                  <input id="file-upload" type="file" accept="audio/*,video/*" onChange={handleTrackUpload} className="hidden" />
                 </div>
               )}
             </div>
@@ -1631,6 +1744,7 @@ export default function KaraokeStudio() {
             </button>
           </div>
           </div>
+          )
         ) : (
           <div className="flex-1 flex flex-col min-h-0 bg-transparent overflow-hidden gap-3">
             {lyrics.length === 0 ? (
@@ -1869,7 +1983,7 @@ export default function KaraokeStudio() {
       </div>
 
       {/* Hidden audio element for synchronized playback DURING recording */}
-      {trackUrl && (
+      {trackUrl && !isVideo && (
         <audio 
           ref={audioRef} 
           src={trackUrl} 

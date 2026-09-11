@@ -97,10 +97,49 @@ export function LyricsSyncTool() {
       const reader = new FileReader();
       reader.onload = (ev) => {
         const text = ev.target?.result as string;
-        const parsed = text
-          .split('\n')
-          .map((line) => {
-            const match = line.match(/\[(\d+):(\d{2}\.\d{2})\](.*)/);
+        let parsed: LineSync[] = [];
+        const lines = text.split('\n').map(l => l.trim());
+        
+        if (text.includes('-->')) {
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            if (line.includes('-->')) {
+              const timeMatch = line.match(/(?:(\d{2}):)?(\d{2}):(\d{2})[,.](\d{3})\s*-->\s*(?:(\d{2}):)?(\d{2}):(\d{2})[,.](\d{3})/);
+              if (timeMatch) {
+                const h1 = parseInt(timeMatch[1] || '0', 10);
+                const m1 = parseInt(timeMatch[2], 10);
+                const s1 = parseInt(timeMatch[3], 10);
+                const ms1 = parseInt(timeMatch[4], 10);
+                const start = h1 * 3600 + m1 * 60 + s1 + ms1 / 1000;
+                
+                const h2 = parseInt(timeMatch[5] || '0', 10);
+                const m2 = parseInt(timeMatch[6], 10);
+                const s2 = parseInt(timeMatch[7], 10);
+                const ms2 = parseInt(timeMatch[8], 10);
+                const end = h2 * 3600 + m2 * 60 + s2 + ms2 / 1000;
+                
+                let txt = '';
+                let j = i + 1;
+                while (j < lines.length && lines[j] !== '' && !lines[j].match(/^\d+$/)) {
+                  txt += (txt ? ' ' : '') + lines[j];
+                  j++;
+                }
+                
+                if (txt) {
+                  parsed.push({
+                    id: "line-" + Date.now() + "-" + Math.random(),
+                    text: txt,
+                    start: start,
+                    end: end
+                  });
+                }
+                i = j - 1;
+              }
+            }
+          }
+        } else {
+          parsed = lines.map((line) => {
+            const match = line.match(/\[(\d+):(\d{2}\.\d{2,3})\](.*)/);
             if (match) {
               const mins = parseInt(match[1], 10);
               const secs = parseFloat(match[2]);
@@ -110,11 +149,11 @@ export function LyricsSyncTool() {
             }
             const txt = line.trim();
             if (txt) {
-              return { id: "line-" + Date.now() + "-" + Math.random(), text: txt, start: null, end: null } as LineSync;
+               return { id: "line-" + Date.now() + "-" + Math.random(), text: txt, start: null, end: null } as LineSync;
             }
             return null;
-          })
-          .filter((l): l is LineSync => l !== null && l.text !== '');
+          }).filter((l): l is LineSync => l !== null && l.text !== '');
+        }
         setLyrics(parsed);
       };
       reader.readAsText(file);
@@ -294,7 +333,7 @@ export function LyricsSyncTool() {
 
           <div className="pt-8 flex flex-col items-center space-y-6">
             <label className="cursor-pointer group flex flex-col items-center">
-              <input type="file" accept="audio/*" className="hidden" onChange={handleTrackUpload} />
+              <input type="file" accept="audio/*,video/*" className="hidden" onChange={handleTrackUpload} />
               <div className="border border-edge/40 text-foreground group-hover:border-edge group-hover:bg-panel transition-all rounded-full px-8 py-3 flex items-center gap-2 font-medium">
                 <Upload className="w-5 h-5" />
                 Browse my files
@@ -308,7 +347,7 @@ export function LyricsSyncTool() {
             </div>
 
             <label className="cursor-pointer text-sm text-secondary hover:text-foreground transition-colors flex items-center gap-2">
-              <input type="file" accept=".lrc" className="hidden" onChange={handleLRCUpload} />
+              <input type="file" accept=".lrc,.srt,.vtt" className="hidden" onChange={handleLRCUpload} />
               <FileText className="w-4 h-4" />
               Import an existing .lrc file
             </label>
@@ -329,7 +368,7 @@ export function LyricsSyncTool() {
             <span className="truncate max-w-[200px] sm:max-w-md">{trackFile?.name || "Audio Track"}</span>
           </div>
           <label className="cursor-pointer text-sm text-secondary hover:text-foreground transition-colors flex items-center gap-1 bg-control px-3 py-1.5 rounded-md border border-edge/20">
-            <input type="file" accept="audio/*" className="hidden" onChange={handleTrackUpload} />
+            <input type="file" accept="audio/*,video/*" className="hidden" onChange={handleTrackUpload} />
             Change File
           </label>
         </header>
@@ -365,7 +404,7 @@ export function LyricsSyncTool() {
               </div>
 
               <label className="cursor-pointer text-sm text-secondary hover:text-foreground transition-colors flex items-center gap-2 border border-edge/20 rounded-full px-6 py-2 bg-panel">
-                <input type="file" accept=".lrc" className="hidden" onChange={handleLRCUpload} />
+                <input type="file" accept=".lrc,.srt,.vtt" className="hidden" onChange={handleLRCUpload} />
                 <FileText className="w-4 h-4" />
                 Import .LRC file
               </label>
