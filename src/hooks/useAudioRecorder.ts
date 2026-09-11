@@ -14,8 +14,8 @@ export function useAudioRecorder() {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
 
-  const prepareRecording = useCallback(async () => {
-    if (streamRef.current) return;
+  const prepareRecording = useCallback(async (): Promise<boolean> => {
+    if (streamRef.current) return true;
     try {
       let stream: MediaStream;
       try {
@@ -40,6 +40,7 @@ export function useAudioRecorder() {
       analyser.fftSize = 2048;
       source.connect(analyser);
       analyserRef.current = analyser;
+      return true;
     } catch (err: any) {
       console.error('Failed to access microphone', err);
       if (!navigator.mediaDevices) {
@@ -47,6 +48,7 @@ export function useAudioRecorder() {
       } else {
          setMicError(`Microphone access failed: ${err.message || err.name || 'Permission Denied'}.\n\nPlease ensure you have granted microphone permissions in your browser settings and refresh the page.`);
       }
+      return false;
     }
   }, []);
 
@@ -82,6 +84,7 @@ export function useAudioRecorder() {
       } else {
          setMicError(`Microphone access failed: ${err.message || err.name || 'Permission Denied'}.\n\nPlease ensure you have granted microphone permissions in your browser settings and refresh the page.`);
       }
+      return false;
     }
   }, []);
 

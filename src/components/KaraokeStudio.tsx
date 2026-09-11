@@ -526,6 +526,12 @@ export default function KaraokeStudio() {
   };
 
   const handleStartRecording = async () => {
+    // CRITICAL FIX: We MUST request the microphone immediately on the click event!
+    // If we wait for a React dialog (like Headphones Required) first, mobile Safari/Chrome
+    // will destroy the "User Gesture" security token and silently block getUserMedia.
+    const micReady = await prepareRecording();
+    if (!micReady) return; // User denied or error occurred, banner will show automatically.
+
     if (!headphonesConfirmed) {
       const confirmed = await showDialog({
         title: "Headphones Required",
@@ -568,9 +574,6 @@ export default function KaraokeStudio() {
     }
 
     stopPreview();
-    
-    // Initialize microphone immediately so we don't have lag later
-    await prepareRecording();
     
     let actualWaitTime = 0;
     
