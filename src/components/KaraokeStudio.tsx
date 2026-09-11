@@ -564,9 +564,9 @@ export default function KaraokeStudio() {
       
       if (takeMode === "continue") {
         // If they seeked, use that time. Otherwise append to the end.
-        const startTime = (currentTime > 0 && currentTime < vocalBuffer.duration) 
-          ? currentTime 
-          : vocalBuffer.duration;
+        // If they placed the playhead manually (currentTime > 0), punch in EXACTLY there.
+        // Otherwise, default to the very end of the recorded buffer.
+        const startTime = currentTime > 0 ? currentTime : vocalBuffer.duration;
         punchInTimeRef.current = startTime;
         setCurrentTime(startTime);
         isContinueTake = true;
@@ -581,11 +581,11 @@ export default function KaraokeStudio() {
 
     stopPreview();
     
-    // Pre-warm microphone so startRecording() is instant later
+    // Initialize microphone immediately so we don't have lag later
     await prepareRecording();
     
     let actualWaitTime = 0;
-
+    
     if (isContinueTake && punchInTimeRef.current > 0) {
       const preRollDuration = 3; 
       const preRollStart = Math.max(0, punchInTimeRef.current - preRollDuration);
@@ -598,11 +598,33 @@ export default function KaraokeStudio() {
          if (audioRef.current) {
            audioRef.current.volume = Math.min(mixSettings.trackVolume / 100, 1);
            audioRef.current.currentTime = preRollStart;
-           audioRef.current.play();
+           // Start pre-roll playback
+           audioRef.current.play().catch((e: any) => console.error(e));
          }
          
          const iv = setInterval(() => setCountdown(c => (c ? c - 1 : null)), 1000);
-         await new Promise(resolve => setTimeout(resolve, actualWaitTime * 1000));
+         
+         // Wait for the media element to physically reach the punch-in time
+         // This fixes video buffering lag making the punch-in time wildly inaccurate
+         await new Promise<void>(resolve => {
+           if (!audioRef.current) {
+             setTimeout(resolve, actualWaitTime * 1000);
+             return;
+           }
+           const checkTime = () => {
+             if (audioRef.current && audioRef.current.currentTime >= punchInTimeRef.current) {
+               audioRef.current.removeEventListener('timeupdate', checkTime);
+               resolve();
+             }
+           };
+           audioRef.current.addEventListener('timeupdate', checkTime);
+           // Fallback just in case timeupdate fails or hangs
+           setTimeout(() => {
+             if (audioRef.current) audioRef.current.removeEventListener('timeupdate', checkTime);
+             resolve();
+           }, (actualWaitTime * 1000) + 2000);
+         });
+         
          clearInterval(iv);
          
          setIsCountingIn(false);
@@ -619,17 +641,19 @@ export default function KaraokeStudio() {
       setCountdown(null);
     }
 
-    if (isContinueTake && actualWaitTime > 0 && audioRef.current) {
+    // Capture the EXACT time of the backing track right before we trigger MediaRecorder
+    if (audioRef.current && isContinueTake && actualWaitTime > 0) {
       punchInTimeRef.current = audioRef.current.currentTime;
     }
 
     resetRecording();
     await startRecording();
     
+    // If we didn't do a pre-roll, start the backing track NOW
     if (audioRef.current && (!isContinueTake || actualWaitTime <= 0)) {
       audioRef.current.volume = Math.min(mixSettings.trackVolume / 100, 1);
       audioRef.current.currentTime = punchInTimeRef.current;
-      audioRef.current.play();
+      audioRef.current.play().catch((e: any) => console.error(e));
     }
   };
 
