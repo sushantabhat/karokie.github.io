@@ -430,6 +430,18 @@ export default function KaraokeStudio() {
   const handleTrackUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Security/UX check: strictly block images or unsupported files
+      if (!file.type.startsWith('audio/') && !file.type.startsWith('video/')) {
+        setDialog({
+          type: 'confirm',
+          title: 'Invalid File',
+          message: 'Please upload an audio or video file (like .mp3 or .mp4). Photos are not supported!',
+          resolve: () => setDialog(null)
+        });
+        e.target.value = ''; // Reset input
+        return;
+      }
+      
       setTrackFile(file);
       const url = URL.createObjectURL(file);
       setTrackUrl(url);
