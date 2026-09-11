@@ -941,9 +941,8 @@ export default function KaraokeStudio() {
   };
 
   const handlePlayPauseClick = () => {
-    if (isRecording) {
-      handlePauseResumeRecording();
-    } else if (isPlaying) {
+    if (isRecording) return; // Cannot preview while recording
+    if (isPlaying) {
       if (audioRef.current && isVideo) audioRef.current.pause();
       stopPreview();
     } else {
@@ -1178,16 +1177,16 @@ export default function KaraokeStudio() {
             <div className="flex items-center gap-1.5 bg-transparent p-1.5 rounded-full border border-edge/20 light:border-edge overflow-x-auto hide-scrollbar">
               <button 
                 onClick={handlePlayPauseClick} 
-                disabled={!trackBuffer && !isRecording}
+                disabled={!trackBuffer || isRecording}
                 className={`px-4 py-2 rounded-full flex items-center justify-center gap-2 transition-all font-bold text-xs whitespace-nowrap ${
-                  (isPlaying || (isRecording && !isRecPaused))
+                  isPlaying
                     ? 'bg-[#10b981] text-white shadow-[0_0_10px_rgba(16,185,129,0.4)]'
                     : 'bg-transparent text-[#10b981] hover:bg-control hover:text-[#10b981] disabled:opacity-50 disabled:pointer-events-none'
                 }`}
-                title={isRecording ? "Pause/Resume Recording" : "Play/Pause"}
+                title="Play/Pause Preview"
               >
-                {(isPlaying || (isRecording && !isRecPaused)) ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current" />}
-                {(isPlaying || (isRecording && !isRecPaused)) ? "PAUSE" : "PREVIEW MIX"}
+                {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current" />}
+                {isPlaying ? "PAUSE PREVIEW" : "PREVIEW MIX"}
               </button>
 
               <button 
