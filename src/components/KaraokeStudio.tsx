@@ -3,8 +3,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import WaveformEditor from "./WaveformEditor";
-import { DraftsModal } from "./DraftsModal";
-import { saveDraft, SavedDraft } from "@/utils/db";
 
 
 import { Upload, Headphones, Mic, Play, Pause, Square, Settings2, Download, CheckCircle2, Volume2, Mic2, FileText, RotateCcw, Target, Plus, Minus, Save, FolderOpen, Trash2, Sun, Moon } from 'lucide-react';
@@ -785,7 +783,6 @@ export default function KaraokeStudio() {
   const [vocalMuted, setVocalMuted] = useState(false);
   const [showFullLyrics, setShowFullLyrics] = useState(false);
   
-  const [showDraftsModal, setShowDraftsModal] = useState(false);
   const showDialog = (config: Omit<DialogState, "resolve">): Promise<any> => {
     return new Promise((resolve) => {
       setDialog({ ...config, resolve });
@@ -793,48 +790,7 @@ export default function KaraokeStudio() {
   };
 
   const [dialog, setDialog] = useState<DialogState | null>(null);
-  const [isSavingDraft, setIsSavingDraft] = useState(false);
 
-  const handleSaveDraftClick = async () => {
-    if (!trackFile) return;
-    
-    const defaultTitle = trackFile.name.replace(/\.[^/.]+$/, "") || "Untitled Project";
-    const userTitle = await showDialog({
-      title: "Name Your Draft",
-      message: "Enter a name for this draft:",
-      type: "prompt",
-      defaultValue: defaultTitle
-    });
-    
-    if (userTitle === null || userTitle === undefined) return; // User cancelled
-    
-    setIsSavingDraft(true);
-    try {
-      const draftId = `draft_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      const finalTitle = userTitle.trim() || defaultTitle;
-      
-      await saveDraft({
-        id: draftId,
-        title: finalTitle,
-        updatedAt: Date.now(),
-        trackFile,
-        recordedBlob: recordedBlob || undefined,
-        lyrics,
-        mixSettings
-      });
-      alert('Draft saved successfully!');
-    } catch (e: any) {
-      if (e.message === 'LIMIT_REACHED') {
-        alert('You have reached the limit of 3 drafts. Please delete an old draft first.');
-        setShowDraftsModal(true);
-      } else {
-        alert('Failed to save draft. Try again.');
-        console.error(e);
-      }
-    } finally {
-      setIsSavingDraft(false);
-    }
-  };
 
   const handleNewSession = async () => {
     const confirmed = await showDialog({
@@ -858,25 +814,6 @@ export default function KaraokeStudio() {
     }
   };
 
-  const handleLoadDraft = (draft: SavedDraft) => {
-    if (isPlaying) handleStopClick();
-    if (draft.trackFile) {
-      setTrackFile(draft.trackFile);
-      setTrackUrl(URL.createObjectURL(draft.trackFile));
-      loadTrack(draft.trackFile);
-    }
-    
-    if (draft.recordedBlob) {
-      setRecordedBlob(draft.recordedBlob);
-    } else {
-      setRecordedBlob(null);
-      clearVocal();
-    }
-    
-    setLyrics(draft.lyrics);
-    setMixSettings(draft.mixSettings);
-    setActiveTab('MIXER');
-  };
 
   // Mute Logic
   const effectiveTrackVolume = trackMuted ? 0 : mixSettings.trackVolume;
@@ -1114,7 +1051,6 @@ export default function KaraokeStudio() {
 
   return (
     <>
-      {showDraftsModal && <DraftsModal onClose={() => setShowDraftsModal(false)} onLoad={handleLoadDraft} />}
       {/* Unified Dialog System */}
       {dialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => { dialog.resolve(dialog.type === "confirm" ? false : null); setDialog(null); }}>
@@ -1285,24 +1221,7 @@ export default function KaraokeStudio() {
 
           <div className="hidden md:block h-6 w-px bg-control" />
 
-          {/* Action Buttons based on Tab */}
-          <div className="flex items-center justify-start md:justify-center w-full md:w-auto gap-2 md:gap-3 overflow-x-auto no-scrollbar pb-1 md:pb-0 scroll-smooth">
-            <button 
-              onClick={() => setShowDraftsModal(true)}
-              className="px-3 md:px-5 py-2 shrink-0 bg-transparent border border-[#1db954]/30 text-[#1db954] hover:bg-[#1db954]/10 rounded-full text-xs font-bold transition-all flex items-center gap-1.5"
-            >
-              <FolderOpen className="w-3.5 h-3.5" />
-              <span>My Drafts</span>
-            </button>
-            <button 
-              onClick={handleSaveDraftClick}
-              disabled={!trackFile || lyrics.length === 0}
-              className="px-3 md:px-5 py-2 shrink-0 bg-transparent border border-edge/20 light:border-edge text-foreground hover:bg-control rounded-full text-xs font-medium transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center gap-1.5"
-            >
-              <Save className="w-3.5 h-3.5" />
-              {isSavingDraft ? "Saving..." : <span>Save Draft</span>}
-            </button>
-          </div>
+
         </div>
 
         {/* Hidden file inputs */}
