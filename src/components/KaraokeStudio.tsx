@@ -1015,14 +1015,6 @@ export default function KaraokeStudio() {
       )}
 
       <div className="h-[100dvh] flex flex-col bg-background text-foreground font-sans relative overflow-hidden">
-        {/* Neon Background Accents */}
-        {theme === 'dark' && (
-          <>
-            <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-600/20 blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-cyan-600/20 blur-[120px] pointer-events-none" />
-            <div className="absolute top-[40%] left-[30%] w-[30%] h-[30%] rounded-full bg-blue-600/10 blur-[100px] pointer-events-none" />
-          </>
-        )}
       {isCountingIn && (
         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm pointer-events-auto">
           {countdown !== null && countdown > 0 && (
@@ -1037,7 +1029,7 @@ export default function KaraokeStudio() {
       )}
 
       {/* HEADER */}
-      <header className="shrink-0 flex flex-col md:flex-row md:items-center md:justify-between border-b border-edge/20 light:border-edge bg-panel/60 backdrop-blur-xl px-3 md:px-8 py-2 md:py-0 md:h-16 gap-2 md:gap-0 shadow-lg z-10 overflow-hidden">
+      <header className="shrink-0 flex flex-col md:flex-row md:items-center md:justify-between border-b border-edge/20 light:border-edge bg-panel px-3 md:px-8 py-2 md:py-0 md:h-14 gap-2 md:gap-0 shadow-sm z-10 overflow-hidden">
         
         {/* LEFT SIDE: Brand & Tabs */}
         <div className="flex items-center justify-between gap-3 md:gap-6 z-10">
@@ -1109,6 +1101,17 @@ export default function KaraokeStudio() {
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
+              <a 
+                href="https://discord.gg/PG4ePQWTDh" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-3 md:px-4 h-10 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-full text-xs font-bold transition-all shadow-sm"
+                title="Join our Discord Community"
+              >
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>
+                <span className="hidden md:inline">Discord</span>
+              </a>
+
               <button 
                 onClick={toggleTheme}
                 className="w-10 h-10 shrink-0 rounded-full bg-transparent border border-edge/20 light:border-edge text-muted hover:text-foreground hover:bg-control flex items-center justify-center transition-colors"
@@ -1263,8 +1266,8 @@ export default function KaraokeStudio() {
             )}
 
           {/* TRACK 1: BACKING TRACK */}
-          <div className="flex flex-col md:flex-row md:h-36 border border-edge/20 light:border-edge bg-panel/60 backdrop-blur-xl rounded-xl overflow-hidden shadow-xl z-10 relative">
-            <div className="w-full md:w-72 p-4 md:p-5 flex flex-col justify-center md:justify-between items-stretch gap-4 md:gap-3 border-b md:border-b-0 md:border-r border-edge/20 light:border-edge shrink-0 bg-transparent">
+          <div className="flex flex-col md:flex-row md:h-32 border border-edge/20 light:border-edge bg-panel rounded-xl overflow-hidden shadow-sm">
+            <div className="w-full md:w-72 p-4 md:p-5 flex flex-col justify-center md:justify-between items-stretch gap-4 md:gap-3 border-b md:border-b-0 md:border-r border-edge/20 light:border-edge shrink-0 bg-panel">
               <div className="w-full flex flex-col gap-1 min-w-0">
                 <div className="flex justify-between items-center w-full">
                   <div className="flex items-center gap-2 overflow-hidden pr-2">
@@ -1360,8 +1363,8 @@ export default function KaraokeStudio() {
           </div>
 
           {/* TRACK 2: VOCALS */}
-          <div className="flex flex-col md:flex-row md:h-36 border border-edge/20 light:border-edge bg-panel/60 backdrop-blur-xl rounded-xl overflow-hidden shadow-xl z-10 relative">
-            <div className="w-full md:w-72 p-4 md:p-5 flex flex-col justify-center md:justify-between items-stretch gap-4 md:gap-3 border-b md:border-b-0 md:border-r border-edge/20 light:border-edge shrink-0 bg-transparent">
+          <div className="flex flex-col md:flex-row md:h-32 border border-edge/20 light:border-edge bg-panel rounded-xl overflow-hidden shadow-sm">
+            <div className="w-full md:w-72 p-4 md:p-5 flex flex-col justify-center md:justify-between items-stretch gap-4 md:gap-3 border-b md:border-b-0 md:border-r border-edge/20 light:border-edge shrink-0 bg-panel">
               <div className="w-full flex flex-col gap-1 min-w-0">
                 <div className="flex justify-between items-center w-full">
                   <div className="flex items-center gap-2 overflow-hidden pr-2">
@@ -1467,7 +1470,7 @@ export default function KaraokeStudio() {
           </div>
 
           {/* MASTER BUS SETTINGS (Docked at bottom) */}
-          <div className="p-4 md:p-6 bg-panel/60 backdrop-blur-xl border border-edge/20 light:border-edge rounded-xl flex flex-col md:flex-row gap-6 md:gap-8 shadow-xl z-10 relative">
+          <div className="p-4 md:p-6 bg-panel border border-edge/20 light:border-edge rounded-xl flex flex-col md:flex-row gap-6 md:gap-8 shadow-sm">
             <div className="flex-1">
               <h3 className="text-xs font-bold text-secondary uppercase tracking-wider mb-4 flex items-center gap-2">
                 ⏱️ Sync & Mic Delay
@@ -1540,14 +1543,14 @@ export default function KaraokeStudio() {
             <button
               onClick={handleExportClick}
               disabled={isProcessing || !recordedBlob}
-              className="w-full md:w-auto px-12 py-3 bg-gradient-to-r from-[#00E5FF] to-[#F43F5E] text-white hover:scale-[1.02] active:scale-[0.98] rounded-full text-base font-black transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(0,229,255,0.4)] hover:shadow-[0_0_40px_rgba(244,63,94,0.6)] z-10"
+              className="w-full md:w-auto px-12 py-3 bg-foreground text-background hover:scale-[1.02] active:scale-[0.98] rounded-full text-base font-bold transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 shadow-lg"
             >
               {isProcessing ? 'Processing Mix...' : 'Export Final Audio'}
             </button>
           </div>
           </div>
         ) : (
-          <div className="flex-1 flex flex-col min-h-0 bg-transparent overflow-hidden gap-4">
+          <div className="flex-1 flex flex-col min-h-0 bg-transparent overflow-hidden gap-3">
             {lyrics.length === 0 ? (
               <div className="flex-1 flex flex-col max-w-2xl mx-auto w-full pt-8">
                 <label className="text-sm font-bold text-muted mb-2">Paste Lyrics</label>
