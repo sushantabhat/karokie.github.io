@@ -333,7 +333,7 @@ export function LyricsSyncTool() {
 
           <div className="pt-8 flex flex-col items-center space-y-6">
             <label className="cursor-pointer group flex flex-col items-center">
-              <input type="file" accept="audio/*,video/*" className="hidden" onChange={handleTrackUpload} />
+              <input type="file" accept=".mp3,.wav,.m4a,.aac,.ogg,.mp4,.webm,audio/mpeg,audio/wav,audio/aac,audio/ogg,video/mp4,video/webm" className="hidden" onChange={handleTrackUpload} />
               <div className="border border-edge/40 text-foreground group-hover:border-edge group-hover:bg-panel transition-all rounded-full px-8 py-3 flex items-center gap-2 font-medium">
                 <Upload className="w-5 h-5" />
                 Browse my files
@@ -368,7 +368,7 @@ export function LyricsSyncTool() {
             <span className="truncate max-w-[200px] sm:max-w-md">{trackFile?.name || "Audio Track"}</span>
           </div>
           <label className="cursor-pointer text-sm text-secondary hover:text-foreground transition-colors flex items-center gap-1 bg-control px-3 py-1.5 rounded-md border border-edge/20">
-            <input type="file" accept="audio/*,video/*" className="hidden" onChange={handleTrackUpload} />
+            <input type="file" accept=".mp3,.wav,.m4a,.aac,.ogg,.mp4,.webm,audio/mpeg,audio/wav,audio/aac,audio/ogg,video/mp4,video/webm" className="hidden" onChange={handleTrackUpload} />
             Change File
           </label>
         </header>

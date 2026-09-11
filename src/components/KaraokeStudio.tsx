@@ -1252,7 +1252,7 @@ export default function KaraokeStudio() {
       )}
 
       {/* Hidden file inputs moved out of header so they still work when header is hidden */}
-      <input type="file" accept="audio/*,video/*" className="hidden" id="file-upload" onChange={handleTrackUpload} />
+      <input type="file" accept=".mp3,.wav,.m4a,.aac,.ogg,.mp4,.webm,audio/mpeg,audio/wav,audio/aac,audio/ogg,video/mp4,video/webm" className="hidden" id="file-upload" onChange={handleTrackUpload} />
       <input type="file" accept=".lrc,.srt,.vtt" className="hidden" id="lrc-upload" onChange={handleLRCUpload} />
 
       {/* TIMELINE AREA */}
@@ -1498,7 +1498,7 @@ export default function KaraokeStudio() {
                   >
                     Click to Load Instrumental Track
                   </button>
-                  <input id="file-upload" type="file" accept="audio/*,video/*" onChange={handleTrackUpload} className="hidden" />
+                  <input id="file-upload" type="file" accept=".mp3,.wav,.m4a,.aac,.ogg,.mp4,.webm,audio/mpeg,audio/wav,audio/aac,audio/ogg,video/mp4,video/webm" onChange={handleTrackUpload} className="hidden" />
                 </div>
               )}
             </div>
