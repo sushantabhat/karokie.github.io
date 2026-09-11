@@ -11,9 +11,10 @@ import { Upload, Headphones, Mic, Play, Pause, Square, Settings2, Download, Chec
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { useAudioMixer, MixSettings } from '@/hooks/useAudioMixer';
 import { useTheme } from '@/hooks/useTheme';
-import { saveTrackToDB, getTrackFromDB, saveVocalToDB, getVocalFromDB } from '@/utils/indexedDB';
+import { saveTrackToDB, getTrackFromDB, saveVocalToDB, getVocalFromDB, clearTrackFromDB, clearVocalFromDB } from '@/utils/indexedDB';
 import { audioBufferToWav } from '@/utils/audioBufferToWav';
 import { track } from "@vercel/analytics";
+import { Joyride, Step, EventData, STATUS } from 'react-joyride';
 
 const readVar = (name: string) =>
   typeof window !== 'undefined'
@@ -231,7 +232,71 @@ export default function KaraokeStudio() {
   const [trackUrl, setTrackUrl] = useState<string | null>(null);
   const [headphonesConfirmed, setHeadphonesConfirmed] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
-  
+  const [runTour, setRunTour] = useState(false);
+  const tourSteps: Step[] = [
+    {
+      target: '.tour-step-1-target',
+      content: (
+        <div className="text-left flex flex-col gap-1">
+          <strong className="text-base">1. Drop the Beat 🎧</strong>
+          <span className="text-sm opacity-90">Click here to load your instrumental track.</span>
+          <span className="text-[11px] opacity-70 mt-1 italic">Pro tip: Wear headphones so your mic doesn't record the speakers!</span>
+        </div>
+      ),
+      skipBeacon: true,
+      placement: 'bottom',
+      spotlightPadding: 10,
+    },
+    {
+      target: '.tour-step-2',
+      content: (
+        <div className="text-left flex flex-col gap-1">
+          <strong className="text-base">2. Hit Record 🔴</strong>
+          <span className="text-sm opacity-90">Tap the red dot to start recording your vocals over the beat. Don't worry about being perfect—you can always redo it!</span>
+        </div>
+      ),
+      skipBeacon: true,
+      placement: 'bottom',
+      spotlightPadding: 8,
+    },
+    {
+      target: '.tour-step-stop',
+      content: (
+        <div className="text-left flex flex-col gap-1">
+          <strong className="text-base">3. Stop & Listen ⏹️</strong>
+          <span className="text-sm opacity-90">When you are done recording, hit the Stop button to finish the take and listen back!</span>
+          <span className="text-[11px] opacity-70 mt-1 italic">Pro tip: You can use the Play/Pause button to pause mid-take!</span>
+        </div>
+      ),
+      skipBeacon: true,
+      placement: 'bottom',
+      spotlightPadding: 8,
+    },
+    {
+      target: '.tour-step-3',
+      content: (
+        <div className="text-left flex flex-col gap-1">
+          <strong className="text-base">4. Scrolling Lyrics 🎤</strong>
+          <span className="text-sm opacity-90">Need lyrics? Switch to the Sync tab, paste your words, and tap the spacebar to lock them to the beat in real-time.</span>
+        </div>
+      ),
+      skipBeacon: true,
+      placement: 'bottom',
+      spotlightPadding: 8,
+    },
+    {
+      target: '.tour-step-4',
+      content: (
+        <div className="text-left flex flex-col gap-1">
+          <strong className="text-base">5. Final Polish ✨</strong>
+          <span className="text-sm opacity-90">Toggle on Studio Reverb, adjust your mix volumes, and hit Export to save your masterpiece!</span>
+        </div>
+      ),
+      skipBeacon: true,
+      placement: 'top',
+      spotlightPadding: 10,
+    },
+  ];
   const { 
     isRecording, isPaused: isRecPaused, 
     recordedBlob, setRecordedBlob, prepareRecording, startRecording, stopRecording, pauseRecording, resumeRecording, resetRecording, getAnalyser 
@@ -332,6 +397,24 @@ export default function KaraokeStudio() {
       saveVocalToDB(blob).catch(console.error);
     }
   }, [vocalBuffer]);
+
+  const handleJoyrideCallback = (data: EventData) => {
+    const { status } = data;
+    const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
+    if (finishedStatuses.includes(status)) {
+      setRunTour(false);
+      localStorage.setItem('hasSeenTour', 'true');
+    }
+  };
+
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    if (!localStorage.getItem('hasSeenTour')) {
+      setTimeout(() => setRunTour(true), 1500);
+    }
+  }, []);
 
   // ==== Export .LRC ====
   const formatLRC = () => {
@@ -716,8 +799,10 @@ export default function KaraokeStudio() {
       setTrackFile(null);
       setTrackUrl(null);
       clearTrack(); // useAudioMixer will handle null or we can just ignore since UI will block play
+      clearTrackFromDB().catch(console.error);
       setRecordedBlob(null);
       clearVocal();
+      clearVocalFromDB().catch(console.error);
       setLyrics([]);
       setRawLyricsText("");
       setCurrentTime(0);
@@ -1027,6 +1112,25 @@ export default function KaraokeStudio() {
           </div>
         </div>
       )}
+      
+      {isMounted && (
+        <Joyride
+        key={runTour ? 'running' : 'stopped'}
+        steps={tourSteps}
+        run={runTour}
+        continuous={true}
+        locale={{ last: "Finish", skip: "Skip", next: "Next", back: "Back" }}
+        onEvent={handleJoyrideCallback}
+        options={{
+          primaryColor: '#0ea5e9',
+          backgroundColor: theme === 'dark' ? '#161B22' : '#ffffff',
+          textColor: theme === 'dark' ? '#fafafa' : '#0F172A',
+          zIndex: 99999,
+          showProgress: true,
+          buttons: ['back', 'skip', 'primary']
+        }}
+      />
+      )}
 
       {/* HEADER */}
       <header className="shrink-0 flex flex-col md:flex-row md:items-center md:justify-between border-b border-edge/20 light:border-edge bg-panel px-3 md:px-8 py-2 md:py-0 md:h-14 gap-2 md:gap-0 shadow-sm z-10 overflow-hidden">
@@ -1043,7 +1147,7 @@ export default function KaraokeStudio() {
           {/* VIEW TOGGLE */}
           <div className="flex bg-seg-bg p-1 rounded-full border border-edge/20 light:border-edge">
             <button onClick={() => setActiveTab("MIXER")} className={`px-3 md:px-5 py-1.5 rounded-full text-xs font-medium transition-all ${activeTab === "MIXER" ? "bg-seg-active text-foreground font-semibold shadow-sm" : "text-muted hover:text-foreground"}`}>Mixer</button>
-            <button onClick={() => setActiveTab("SYNC")} className={`px-3 md:px-5 py-1.5 rounded-full text-xs font-medium transition-all ${activeTab === "SYNC" ? "bg-seg-active text-foreground font-semibold shadow-sm" : "text-muted hover:text-foreground"}`}>Sync</button>
+            <button onClick={() => setActiveTab("SYNC")} className={`tour-step-3 px-3 md:px-5 py-1.5 rounded-full text-xs font-medium transition-all ${activeTab === "SYNC" ? "bg-seg-active text-foreground font-semibold shadow-sm" : "text-muted hover:text-foreground"}`}>Sync</button>
             <button 
               onClick={() => { if (hasSyncedLines) setActiveTab("EDIT"); }} 
               disabled={!hasSyncedLines}
@@ -1066,21 +1170,21 @@ export default function KaraokeStudio() {
             <div className="flex items-center gap-1 bg-transparent p-1.5 rounded-full border border-edge/20 light:border-edge">
               <button 
                 onClick={handlePlayPauseClick} 
-                disabled={isRecording || !trackBuffer}
+                disabled={!trackBuffer && !isRecording}
                 className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                  (isPlaying)
+                  (isPlaying || (isRecording && !isRecPaused))
                     ? 'bg-[#10b981] text-white shadow-[0_0_10px_rgba(16,185,129,0.4)]'
                     : 'bg-transparent text-[#10b981] hover:bg-control hover:text-[#10b981] disabled:opacity-50 disabled:pointer-events-none'
                 }`}
-                title="Play/Pause"
+                title={isRecording ? "Pause/Resume Recording" : "Play/Pause"}
               >
-                {(isPlaying) ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-1" />}
+                {(isPlaying || (isRecording && !isRecPaused)) ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-1" />}
               </button>
 
               <button 
                 onClick={handleStartRecording}
                 disabled={isRecording || isPlaying || !trackFile || activeTab === "SYNC"}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                className={`tour-step-2 w-10 h-10 rounded-full flex items-center justify-center transition-all ${
                   isRecording 
                     ? 'bg-transparent border-2 border-[#ef4444] shadow-[0_0_15px_rgba(239,68,68,0.7)] animate-pulse' 
                     : 'bg-transparent text-[#ef4444] hover:bg-control disabled:opacity-50 disabled:pointer-events-none'
@@ -1093,7 +1197,7 @@ export default function KaraokeStudio() {
               <button 
                 onClick={handleStopClick}
                 disabled={!isRecording && !isPlaying && currentTime === 0}
-                className="w-10 h-10 rounded-full bg-transparent text-muted hover:bg-control hover:text-foreground flex items-center justify-center transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                className="tour-step-stop w-10 h-10 rounded-full bg-transparent text-muted hover:bg-control hover:text-foreground flex items-center justify-center transition-colors disabled:opacity-50 disabled:pointer-events-none"
                 title="Stop"
               >
                 <Square className="w-3 h-3 fill-current" />
@@ -1111,6 +1215,18 @@ export default function KaraokeStudio() {
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>
                 <span className="hidden md:inline">Discord</span>
               </a>
+
+              <button 
+                onClick={() => {
+                  setActiveTab("MIXER");
+                  setRunTour(false);
+                  setTimeout(() => setRunTour(true), 10);
+                }}
+                className="w-10 h-10 shrink-0 rounded-full bg-transparent border border-edge/20 light:border-edge text-muted hover:text-foreground hover:bg-control flex items-center justify-center transition-colors font-bold text-sm"
+                title="How to use this app"
+              >
+                ?
+              </button>
 
               <button 
                 onClick={toggleTheme}
@@ -1266,11 +1382,11 @@ export default function KaraokeStudio() {
             )}
 
           {/* TRACK 1: BACKING TRACK */}
-          <div className="flex flex-col md:flex-row md:h-32 border border-edge/20 light:border-edge bg-panel rounded-xl overflow-hidden shadow-sm">
-            <div className="w-full md:w-72 p-4 md:p-5 flex flex-col justify-center md:justify-between items-stretch gap-4 md:gap-3 border-b md:border-b-0 md:border-r border-edge/20 light:border-edge shrink-0 bg-panel">
+          <div className="tour-step-1 flex flex-col md:flex-row md:h-32 border border-edge/20 light:border-edge bg-panel rounded-xl overflow-hidden shadow-sm">
+            <div className="w-full md:w-[320px] p-4 md:p-5 flex flex-col justify-center md:justify-between items-stretch gap-4 md:gap-3 border-b md:border-b-0 md:border-r border-edge/20 light:border-edge shrink-0 bg-panel">
               <div className="w-full flex flex-col gap-1 min-w-0">
-                <div className="flex justify-between items-center w-full">
-                  <div className="flex items-center gap-2 overflow-hidden pr-2">
+                <div className="flex justify-between items-center w-full min-w-0">
+                  <div className="flex items-center gap-2 overflow-hidden pr-2 min-w-0 shrink">
                     <span className="font-bold text-sm text-foreground truncate">🎵 Instrumental Track</span>
                   </div>
                   <div className="flex gap-2 shrink-0">
@@ -1286,9 +1402,10 @@ export default function KaraokeStudio() {
                             setTrackFile(null);
                             setTrackUrl(null);
                             clearTrack();
+                            clearTrackFromDB().catch(console.error);
                          }
                       }}
-                      className="w-6 h-6 rounded-xl border border-transparent text-secondary hover:text-[#ef4444] hover:bg-[#ef4444]/10 transition-colors flex items-center justify-center"
+                      className="w-7 h-7 rounded-md border border-edge/20 text-secondary hover:text-[#ef4444] hover:border-[#ef4444]/30 hover:bg-[#ef4444]/10 transition-colors flex items-center justify-center"
                       title="Remove Track"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -1340,19 +1457,21 @@ export default function KaraokeStudio() {
             
             <div className={`flex-1 relative h-32 md:h-auto bg-transparent transition-opacity ${trackMuted ? 'opacity-30' : 'opacity-100'}`}>
               {trackBuffer ? (
-                <StaticWaveform 
-                  buffer={trackBuffer} 
-                  color={theme === 'dark' ? '#00E5FF' : '#0284C7'} 
-                  duration={trackBuffer.duration} 
-                  currentTime={currentTime} 
-                  totalDuration={masterDuration}
-                  onSeekStart={handleSeekStart} onSeekDrag={handleSeekDrag} onSeekEnd={handleSeekEnd}
-                />
+                <div className="tour-step-1-target w-full h-full">
+                  <StaticWaveform 
+                    buffer={trackBuffer} 
+                    color={theme === 'dark' ? '#00E5FF' : '#0284C7'} 
+                    duration={trackBuffer.duration} 
+                    currentTime={currentTime} 
+                    totalDuration={masterDuration}
+                    onSeekStart={handleSeekStart} onSeekDrag={handleSeekDrag} onSeekEnd={handleSeekEnd}
+                  />
+                </div>
               ) : (
                 <div className="w-full h-full flex items-center justify-center min-h-[100px] p-4">
                   <button 
                     onClick={() => document.getElementById('file-upload')?.click()}
-                    className="border-2 border-dashed border-edge/20 light:border-edge px-4 md:px-6 py-2.5 rounded-xl text-xs md:text-sm font-medium text-secondary hover:bg-panel hover:border-[#38bdf8] hover:text-foreground transition-all w-full md:w-auto text-center"
+                    className="tour-step-1-target border-2 border-dashed border-edge/20 light:border-edge px-4 md:px-6 py-2.5 rounded-xl text-xs md:text-sm font-medium text-secondary hover:bg-panel hover:border-[#38bdf8] hover:text-foreground transition-all w-full md:w-auto text-center"
                   >
                     Click to Load Instrumental Track
                   </button>
@@ -1364,10 +1483,10 @@ export default function KaraokeStudio() {
 
           {/* TRACK 2: VOCALS */}
           <div className="flex flex-col md:flex-row md:h-32 border border-edge/20 light:border-edge bg-panel rounded-xl overflow-hidden shadow-sm">
-            <div className="w-full md:w-72 p-4 md:p-5 flex flex-col justify-center md:justify-between items-stretch gap-4 md:gap-3 border-b md:border-b-0 md:border-r border-edge/20 light:border-edge shrink-0 bg-panel">
+            <div className="w-full md:w-[320px] p-4 md:p-5 flex flex-col justify-center md:justify-between items-stretch gap-4 md:gap-3 border-b md:border-b-0 md:border-r border-edge/20 light:border-edge shrink-0 bg-panel">
               <div className="w-full flex flex-col gap-1 min-w-0">
-                <div className="flex justify-between items-center w-full">
-                  <div className="flex items-center gap-2 overflow-hidden pr-2">
+                <div className="flex justify-between items-center w-full min-w-0">
+                  <div className="flex items-center gap-2 overflow-hidden pr-2 min-w-0 shrink">
                     <div className={`w-2 h-2 rounded-full shrink-0 ${isRecording ? 'bg-[#ef4444] animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]' : 'bg-edge'}`} />
                     <span className="font-bold text-sm text-foreground truncate">🎤 Your Voice</span>
                     {(isPlaying || isRecording) && (
@@ -1391,9 +1510,10 @@ export default function KaraokeStudio() {
                               if (isPlaying) handleStopClick();
                               setRecordedBlob(null);
                               clearVocal();
+                              clearVocalFromDB().catch(console.error);
                            }
                         }}
-                        className="w-6 h-6 rounded-xl border border-transparent text-secondary hover:text-[#ef4444] hover:bg-[#ef4444]/10 transition-colors flex items-center justify-center"
+                        className="w-7 h-7 rounded-md border border-edge/20 text-secondary hover:text-[#ef4444] hover:border-[#ef4444]/30 hover:bg-[#ef4444]/10 transition-colors flex items-center justify-center"
                         title="Delete Vocals"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -1543,7 +1663,7 @@ export default function KaraokeStudio() {
             <button
               onClick={handleExportClick}
               disabled={isProcessing || !recordedBlob}
-              className="w-full md:w-auto px-12 py-3 bg-foreground text-background hover:scale-[1.02] active:scale-[0.98] rounded-full text-base font-bold transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 shadow-lg"
+              className="tour-step-4 w-full md:w-auto px-12 py-3 bg-foreground text-background hover:scale-[1.02] active:scale-[0.98] rounded-full text-base font-bold transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 shadow-lg"
             >
               {isProcessing ? 'Processing Mix...' : 'Export Final Audio'}
             </button>

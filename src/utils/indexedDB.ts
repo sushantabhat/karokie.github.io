@@ -75,3 +75,14 @@ export async function getVocalFromDB(): Promise<Blob | null> {
     request.onerror = () => reject(request.error);
   });
 }
+
+export async function clearVocalFromDB(): Promise<void> {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    const request = store.delete('currentVocal');
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
