@@ -104,90 +104,34 @@ export function Sidebar() {
         </div>
       </aside>
 
-      {/* Mobile Hamburger (only if not on karaoke page) */}
-      {!isKaraokePage && (
-        <button
-          className="md:hidden fixed top-3 left-3 z-50 p-2 bg-panel/80 backdrop-blur rounded-lg border border-edge/20 text-foreground shadow-md"
-          onClick={() => setMobileMenuOpen(true)}
-        >
-          <Menu className="w-6 h-6" />
-        </button>
-      )}
-
-      {/* Mobile Menu Overlay */}
-      {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-[100] bg-background flex flex-col">
-          <div className="flex items-center justify-between p-4 border-b border-edge/20">
-            <h2 className="text-lg font-semibold text-foreground">Menu</h2>
-            <button
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-2 text-muted hover:text-foreground bg-control/10 rounded-full"
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-[64px] bg-panel border-t border-edge/20 z-50 flex items-center justify-around px-2 pb-safe">
+        {[...tools, { name: "About", href: "/about", icon: HelpCircle }].map((item) => {
+          const Icon = item.icon;
+          const isActive = pathname === item.href;
+          
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors
+                ${isActive ? "text-[#38bdf8]" : "text-muted hover:text-foreground"}`}
             >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-4">
-            <div className="grid grid-cols-2 gap-4">
-              {/* Combine tools and bottom links for mobile grid */}
-              <button
-                onClick={() => {
-                  toggleTheme();
-                  setMobileMenuOpen(false);
-                }}
-                className="flex flex-col items-center justify-center p-6 rounded-xl border transition-all h-[150px] border-edge/20 bg-panel text-foreground hover:border-edge/60"
-              >
-                {theme === 'dark' ? <Sun className="w-10 h-10 mb-3" /> : <Moon className="w-10 h-10 mb-3" />}
-                <span className="font-medium text-center">Toggle Theme</span>
-              </button>
-              {[...tools, ...bottomLinks].map((item) => {
-                const Icon = item.icon;
-                const isActive = pathname === item.href;
-                const isDisabled = "disabled" in item ? item.disabled : false;
-                const badge = "badge" in item ? item.badge : null;
-                const isExternal = "external" in item ? item.external : false;
-
-                const cardClass = `flex flex-col items-center justify-center p-6 rounded-xl border transition-all h-[150px]
-                  ${isActive 
-                    ? "border-[#38bdf8] bg-[#38bdf8]/10 text-[#38bdf8]" 
-                    : "border-edge/20 bg-panel text-foreground"
-                  }
-                  ${isDisabled ? "opacity-40" : "hover:border-edge/60"}
-                `;
-
-                if (isDisabled) {
-                  return (
-                    <div key={item.name} className={cardClass}>
-                      <Icon className="w-10 h-10 mb-3" />
-                      <span className="font-medium text-center">{item.name}</span>
-                      {badge && (
-                        <span className="text-[10px] font-bold text-secondary uppercase tracking-wider mt-2 bg-background/50 px-2 py-1 rounded">
-                          {badge}
-                        </span>
-                      )}
-                    </div>
-                  );
-                }
-
-                const linkProps = isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {};
-
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    {...linkProps}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={cardClass}
-                  >
-                    <Icon className="w-10 h-10 mb-3" />
-                    <span className="font-medium text-center">{item.name}</span>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
+              <Icon className={`w-5 h-5 ${isActive ? 'fill-[#38bdf8]/20' : ''}`} />
+              <span className="text-[10px] font-medium leading-none">{item.name}</span>
+            </Link>
+          );
+        })}
+        
+        {/* Mobile Theme Toggle */}
+        <button
+          onClick={toggleTheme}
+          className="flex flex-col items-center justify-center w-full h-full space-y-1 text-muted hover:text-foreground transition-colors"
+        >
+          {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          <span className="text-[10px] font-medium leading-none">Theme</span>
+        </button>
+      </nav>
     </>
   );
 }
