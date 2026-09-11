@@ -207,15 +207,17 @@ export default function VoiceChangerTool() {
       bp.connect(dist);
       lastNode = dist;
     } else if (effect === 'alien') {
+      // True Alien: 100% wet vibrato + gargle. 
+      // Restored the original crazy sci-fi vibe, but halved the pitch-warp depth so words are intelligible.
       const delay = ctx.createDelay();
       delay.delayTime.value = 0.05;
       
       const osc = ctx.createOscillator();
       osc.type = 'sine';
-      osc.frequency.value = 6;
+      osc.frequency.value = 6; // Fast alien wobble
       
       const oscGain = ctx.createGain();
-      oscGain.gain.value = 0.015;
+      oscGain.gain.value = 0.006; // Originally 0.015 (which made it gibberish). 0.006 keeps the alien warble but leaves words intact.
       
       osc.connect(oscGain);
       oscGain.connect(delay.delayTime);
