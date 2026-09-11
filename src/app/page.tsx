@@ -1,9 +1,5 @@
-import KaraokeStudio from '@/components/KaraokeStudio';
+import { redirect } from 'next/navigation';
 
 export default function Home() {
-  return (
-    <main className="flex flex-col items-center gap-4">
-      <KaraokeStudio />
-    </main>
-  );
+  redirect('/karaoke');
 }

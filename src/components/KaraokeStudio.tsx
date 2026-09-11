@@ -7,7 +7,7 @@ import { DraftsModal } from "./DraftsModal";
 import { saveDraft, SavedDraft } from "@/utils/db";
 
 
-import { Upload, Headphones, Mic, Play, Pause, Square, Settings2, Download, CheckCircle2, Volume2, Mic2, RotateCcw, Target, Plus, Minus, Save, FolderOpen, Trash2, Sun, Moon } from 'lucide-react';
+import { Upload, Headphones, Mic, Play, Pause, Square, Settings2, Download, CheckCircle2, Volume2, Mic2, FileText, RotateCcw, Target, Plus, Minus, Save, FolderOpen, Trash2, Sun, Moon } from 'lucide-react';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { useAudioMixer, MixSettings } from '@/hooks/useAudioMixer';
 import { useTheme } from '@/hooks/useTheme';
@@ -273,22 +273,10 @@ export default function KaraokeStudio() {
       spotlightPadding: 8,
     },
     {
-      target: '.tour-step-3',
-      content: (
-        <div className="text-left flex flex-col gap-1">
-          <strong className="text-base">4. Scrolling Lyrics 🎤</strong>
-          <span className="text-sm opacity-90">Need lyrics? Switch to the Sync tab, paste your words, and tap the spacebar to lock them to the beat in real-time.</span>
-        </div>
-      ),
-      skipBeacon: true,
-      placement: 'bottom',
-      spotlightPadding: 8,
-    },
-    {
       target: '.tour-step-4',
       content: (
         <div className="text-left flex flex-col gap-1">
-          <strong className="text-base">5. Final Polish ✨</strong>
+          <strong className="text-base">4. Final Polish ✨</strong>
           <span className="text-sm opacity-90">Toggle on Studio Reverb, adjust your mix volumes, and hit Export to save your masterpiece!</span>
         </div>
       ),
@@ -1144,20 +1132,14 @@ export default function KaraokeStudio() {
           
           <div className="hidden md:block h-6 w-px bg-control" />
           
-          {/* VIEW TOGGLE */}
+          {/* IMPORT LRC */}
           <div className="flex bg-seg-bg p-1 rounded-full border border-edge/20 light:border-edge">
-            <button onClick={() => setActiveTab("MIXER")} className={`px-3 md:px-5 py-1.5 rounded-full text-xs font-medium transition-all ${activeTab === "MIXER" ? "bg-seg-active text-foreground font-semibold shadow-sm" : "text-muted hover:text-foreground"}`}>Mixer</button>
-            <button onClick={() => setActiveTab("SYNC")} className={`tour-step-3 px-3 md:px-5 py-1.5 rounded-full text-xs font-medium transition-all ${activeTab === "SYNC" ? "bg-seg-active text-foreground font-semibold shadow-sm" : "text-muted hover:text-foreground"}`}>Sync</button>
             <button 
-              onClick={() => { if (hasSyncedLines) setActiveTab("EDIT"); }} 
-              disabled={!hasSyncedLines}
-              className={`px-3 md:px-5 py-1.5 rounded-full text-xs font-medium transition-all ${
-                activeTab === "EDIT" ? "bg-seg-active text-foreground font-semibold shadow-sm" : 
-                !hasSyncedLines ? "text-muted/40 cursor-not-allowed" : "text-muted hover:text-foreground"
-              }`}
-              title={!hasSyncedLines ? "Sync lyrics first to unlock" : ""}
+              onClick={() => document.getElementById('lrc-upload')?.click()}
+              className="tour-step-3 px-3 md:px-5 py-1.5 rounded-full text-xs font-medium transition-all bg-seg-active text-foreground font-semibold shadow-sm hover:text-foreground flex items-center gap-2"
             >
-              Edit
+              <FileText className="w-4 h-4 text-[#38bdf8]" />
+              Import .LRC Lyrics
             </button>
           </div>
         </div>
@@ -1205,20 +1187,9 @@ export default function KaraokeStudio() {
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              <a 
-                href="https://discord.gg/PG4ePQWTDh" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-3 md:px-4 h-10 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-full text-xs font-bold transition-all shadow-sm"
-                title="Join our Discord Community"
-              >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>
-                <span className="hidden md:inline">Discord</span>
-              </a>
 
               <button 
                 onClick={() => {
-                  setActiveTab("MIXER");
                   setRunTour(false);
                   setTimeout(() => setRunTour(true), 10);
                 }}
@@ -1227,15 +1198,6 @@ export default function KaraokeStudio() {
               >
                 ?
               </button>
-
-              <button 
-                onClick={toggleTheme}
-                className="w-10 h-10 shrink-0 rounded-full bg-transparent border border-edge/20 light:border-edge text-muted hover:text-foreground hover:bg-control flex items-center justify-center transition-colors"
-                title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-              >
-                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              </button>
-
               <button 
                 onClick={handleNewSession}
                 className="px-4 md:px-5 py-2 bg-transparent border border-red-500/30 text-red-500 hover:bg-red-500/10 rounded-full text-xs font-bold transition-all flex items-center gap-2"

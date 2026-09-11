@@ -1,17 +1,6 @@
-"use client";
-
-import Link from "next/link";
-
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-neutral-50 dark:bg-[#0b0f17] text-neutral-900 dark:text-neutral-100 flex flex-col justify-between transition-colors duration-200">
-      {/* Header */}
-      <header className="w-full max-w-3xl mx-auto px-6 pt-8 pb-4 flex items-center justify-start">
-        <Link className="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors" href="/">
-          ← Back to Studio
-        </Link>
-      </header>
-
+    <main className="h-full overflow-y-auto bg-neutral-50 dark:bg-[#0b0f17] text-neutral-900 dark:text-neutral-100 transition-colors duration-200">
       {/* Main Content */}
       <section className="flex-1 max-w-3xl mx-auto px-6 py-6 w-full space-y-6">
         <div>
