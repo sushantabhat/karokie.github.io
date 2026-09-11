@@ -17,13 +17,20 @@ export function useAudioRecorder() {
   const prepareRecording = useCallback(async () => {
     if (streamRef.current) return;
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: false,
-          noiseSuppression: false,
-          autoGainControl: false,
-        },
-      });
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false,
+          },
+        });
+      } catch (constraintErr) {
+        // Fallback for strict mobile browsers that reject specific audio constraints
+        console.warn("Strict audio constraints rejected, falling back to basic audio: true", constraintErr);
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      }
       streamRef.current = stream;
       
       const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -33,9 +40,13 @@ export function useAudioRecorder() {
       analyser.fftSize = 2048;
       source.connect(analyser);
       analyserRef.current = analyser;
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to access microphone', err);
-      setMicError("Microphone access is blocked!\n\nTo fix on iPhone/Safari:\n1. Tap the 'aA' icon in the web address bar.\n2. Tap 'Website Settings'.\n3. Set Microphone to 'Allow'.\n4. Refresh the page.");
+      if (!navigator.mediaDevices) {
+         setMicError("Microphone access is blocked because your connection is not secure. You must use HTTPS (or localhost) to record audio.");
+      } else {
+         setMicError(`Microphone access failed: ${err.message || err.name || 'Permission Denied'}.\n\nPlease ensure you have granted microphone permissions in your browser settings and refresh the page.`);
+      }
     }
   }, []);
 
@@ -64,9 +75,13 @@ export function useAudioRecorder() {
 
       mediaRecorder.start();
       setIsRecording(true);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to access microphone', err);
-      setMicError("Microphone access is blocked!\n\nTo fix on iPhone/Safari:\n1. Tap the 'aA' icon in the web address bar.\n2. Tap 'Website Settings'.\n3. Set Microphone to 'Allow'.\n4. Refresh the page.");
+      if (!navigator.mediaDevices) {
+         setMicError("Microphone access is blocked because your connection is not secure. You must use HTTPS (or localhost) to record audio.");
+      } else {
+         setMicError(`Microphone access failed: ${err.message || err.name || 'Permission Denied'}.\n\nPlease ensure you have granted microphone permissions in your browser settings and refresh the page.`);
+      }
     }
   }, []);
 
