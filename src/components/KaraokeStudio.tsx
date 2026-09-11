@@ -234,12 +234,12 @@ export default function KaraokeStudio() {
   const [runTour, setRunTour] = useState(false);
   const tourSteps: Step[] = [
     {
-      target: '.tour-step-1-target',
+      target: '.tour-step-3',
       content: (
         <div className="text-left flex flex-col gap-1">
-          <strong className="text-base">1. Drop the Beat 🎧</strong>
-          <span className="text-sm opacity-90">Click here to load your instrumental track.</span>
-          <span className="text-[11px] opacity-70 mt-1 italic">Pro tip: Wear headphones so your mic doesn't record the speakers!</span>
+          <strong className="text-base">1. Load your Lyrics 📝</strong>
+          <span className="text-sm opacity-90">Need the words? Click here to import an .LRC, .SRT, or .VTT file for the teleprompter.</span>
+          <span className="text-[11px] opacity-70 mt-1 italic">Pro tip: You can create these in our Lyrics Sync tool!</span>
         </div>
       ),
       skipBeacon: true,
