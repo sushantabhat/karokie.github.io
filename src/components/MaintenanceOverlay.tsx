@@ -6,6 +6,16 @@ import { Mic2, Wrench } from 'lucide-react';
 export function MaintenanceOverlay() {
   const [isLocked, setIsLocked] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [clickCount, setClickCount] = useState(0);
+
+  const handleSecretClick = () => {
+    const newCount = clickCount + 1;
+    setClickCount(newCount);
+    if (newCount >= 5) {
+      localStorage.setItem('karokie_dev_bypass', 'true');
+      setIsLocked(false);
+    }
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -33,7 +43,7 @@ export function MaintenanceOverlay() {
 
   return (
     <div className="fixed inset-0 z-[9999] bg-[#0b0f17] flex flex-col items-center justify-center text-center p-6">
-      <div className="w-24 h-24 rounded-full bg-[#38bdf8]/10 flex items-center justify-center mb-6 animate-pulse">
+      <div onClick={handleSecretClick} className="w-24 h-24 rounded-full bg-[#38bdf8]/10 flex items-center justify-center mb-6 animate-pulse cursor-pointer">
         <Wrench className="w-12 h-12 text-[#38bdf8]" />
       </div>
       <h1 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">
