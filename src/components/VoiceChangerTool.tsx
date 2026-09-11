@@ -35,6 +35,7 @@ export default function VoiceChangerTool() {
   const [activeEffect, setActiveEffect] = useState<EffectType>('normal');
   const [isPlaying, setIsPlaying] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [micError, setMicError] = useState<string | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
@@ -128,7 +129,7 @@ export default function VoiceChangerTool() {
       setRecordedBlob(null);
     } catch (err) {
       console.error("Mic access denied", err);
-      alert("Microphone access is required to use the Voice Changer.");
+      setMicError("Microphone access is blocked!\n\nTo fix on iPhone/Safari:\n1. Tap the 'aA' icon in the web address bar.\n2. Tap 'Website Settings'.\n3. Set Microphone to 'Allow'.\n4. Refresh the page.");
     }
   };
 
@@ -348,6 +349,17 @@ export default function VoiceChangerTool() {
       <div className="max-w-4xl mx-auto space-y-8">
         
         {/* Header */}
+        
+        {micError && (
+          <div className="bg-[#ef4444] text-white p-4 rounded-xl shadow-lg animate-in slide-in-from-top-4 mb-4">
+            <div className="flex justify-between items-start">
+              <h3 className="font-bold text-lg mb-1">Microphone Blocked 🎤</h3>
+              <button onClick={() => window.location.reload()} className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded text-xs font-bold transition-colors">Reload Page</button>
+            </div>
+            <p className="text-sm whitespace-pre-wrap">{micError}</p>
+          </div>
+        )}
+
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-black text-foreground flex items-center gap-3">

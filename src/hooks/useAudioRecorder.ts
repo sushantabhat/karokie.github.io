@@ -5,6 +5,8 @@ import { useState, useRef, useCallback } from 'react';
 export function useAudioRecorder() {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+
+  const [micError, setMicError] = useState<string | null>(null);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -33,6 +35,7 @@ export function useAudioRecorder() {
       analyserRef.current = analyser;
     } catch (err) {
       console.error('Failed to access microphone', err);
+      setMicError("Microphone access is blocked!\n\nTo fix on iPhone/Safari:\n1. Tap the 'aA' icon in the web address bar.\n2. Tap 'Website Settings'.\n3. Set Microphone to 'Allow'.\n4. Refresh the page.");
     }
   }, []);
 
@@ -63,6 +66,7 @@ export function useAudioRecorder() {
       setIsRecording(true);
     } catch (err) {
       console.error('Failed to access microphone', err);
+      setMicError("Microphone access is blocked!\n\nTo fix on iPhone/Safari:\n1. Tap the 'aA' icon in the web address bar.\n2. Tap 'Website Settings'.\n3. Set Microphone to 'Allow'.\n4. Refresh the page.");
     }
   }, []);
 
@@ -109,6 +113,7 @@ export function useAudioRecorder() {
   return {
     isRecording,
     isPaused,
+    micError,
     recordedBlob,
     prepareRecording,
     startRecording,
