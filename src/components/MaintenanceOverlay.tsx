@@ -52,9 +52,23 @@ export function MaintenanceOverlay() {
       <p className="text-lg md:text-xl text-neutral-400 max-w-lg mb-8">
         We're currently in the lab brewing a massive update. A complete suite of audio tools is coming your way soon.
       </p>
-      <div className="flex items-center gap-2 text-neutral-500 font-medium bg-white/5 px-4 py-2 rounded-full border border-white/10">
-        <Mic2 className="w-4 h-4" />
-        <span>Stay tuned</span>
+      <div className="flex flex-col items-center gap-8 mt-2">
+        <div className="flex items-center gap-2 text-neutral-500 font-medium bg-white/5 px-5 py-2.5 rounded-full border border-white/10">
+          <Mic2 className="w-4 h-4" />
+          <span>Stay tuned</span>
+        </div>
+        
+        <button 
+          onClick={() => {
+            if (window.confirm("⚠️ BETA WARNING ⚠️\n\nThe studio is currently in active development.\n\nIt is not fully polished yet, and you may encounter bugs or broken features.\n\nDo you want to proceed anyway?")) {
+              localStorage.setItem('karokie_dev_bypass', 'true');
+              setIsLocked(false);
+            }
+          }}
+          className="text-xs md:text-sm text-neutral-600 hover:text-neutral-300 underline underline-offset-4 transition-colors font-medium"
+        >
+          I don't mind bugs, let me try it anyway
+        </button>
       </div>
     </div>
   );
