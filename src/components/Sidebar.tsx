@@ -12,7 +12,7 @@ export function Sidebar() {
   const tools = [
     { name: "Karaoke", href: "/karaoke", icon: Mic2, disabled: false },
     { name: "Lyrics Sync", href: "/sync", icon: Music, disabled: false },
-    { name: "Recorder", href: "/recorder", icon: CircleDot, disabled: true, badge: "Coming Soon" },
+    { name: "Voice Changer", href: "/recorder", icon: CircleDot, disabled: false, badge: "" },
   ];
 
   const bottomLinks = [
