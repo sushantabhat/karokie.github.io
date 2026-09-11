@@ -1220,40 +1220,43 @@ export default function KaraokeStudio() {
           {/* Transport & Utilities Row on Mobile */}
           <div className="flex items-center justify-between md:justify-center w-full md:w-auto gap-2">
             {/* Transport Controls */}
-            <div className="flex items-center gap-1 bg-transparent p-1.5 rounded-full border border-edge/20 light:border-edge">
+            <div className="flex items-center gap-1.5 bg-transparent p-1.5 rounded-full border border-edge/20 light:border-edge overflow-x-auto hide-scrollbar">
               <button 
                 onClick={handlePlayPauseClick} 
                 disabled={!trackBuffer && !isRecording}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                className={`px-4 py-2 rounded-full flex items-center justify-center gap-2 transition-all font-bold text-xs whitespace-nowrap ${
                   (isPlaying || (isRecording && !isRecPaused))
                     ? 'bg-[#10b981] text-white shadow-[0_0_10px_rgba(16,185,129,0.4)]'
                     : 'bg-transparent text-[#10b981] hover:bg-control hover:text-[#10b981] disabled:opacity-50 disabled:pointer-events-none'
                 }`}
                 title={isRecording ? "Pause/Resume Recording" : "Play/Pause"}
               >
-                {(isPlaying || (isRecording && !isRecPaused)) ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-1" />}
+                {(isPlaying || (isRecording && !isRecPaused)) ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current" />}
+                {(isPlaying || (isRecording && !isRecPaused)) ? "PAUSE" : "PLAY AUDIO"}
               </button>
 
               <button 
                 onClick={handleStartRecording}
                 disabled={isRecording || isPlaying || !trackFile || activeTab === "SYNC"}
-                className={`tour-step-2 w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                className={`tour-step-2 px-4 py-2 rounded-full flex items-center justify-center gap-2 transition-all font-bold text-xs whitespace-nowrap ${
                   isRecording 
                     ? 'bg-transparent border-2 border-[#ef4444] shadow-[0_0_15px_rgba(239,68,68,0.7)] animate-pulse' 
-                    : 'bg-transparent text-[#ef4444] hover:bg-control disabled:opacity-50 disabled:pointer-events-none'
+                    : 'bg-transparent text-[#ef4444] hover:bg-control hover:bg-[#ef4444]/10 disabled:opacity-50 disabled:pointer-events-none'
                 }`}
                 title="Record"
               >
                 <div className={`rounded-full transition-all ${isRecording ? 'w-3 h-3 bg-[#ef4444]' : 'w-3 h-3 bg-[#ef4444]'}`} />
+                {isRecording ? "RECORDING..." : "START RECORDING"}
               </button>
 
               <button 
                 onClick={handleStopClick}
                 disabled={!isRecording && !isPlaying && currentTime === 0}
-                className="tour-step-stop w-10 h-10 rounded-full bg-transparent text-muted hover:bg-control hover:text-foreground flex items-center justify-center transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                className="tour-step-stop px-4 py-2 rounded-full bg-transparent text-muted hover:bg-control hover:text-foreground flex items-center justify-center gap-2 transition-colors font-bold text-xs whitespace-nowrap disabled:opacity-50 disabled:pointer-events-none"
                 title="Stop"
               >
                 <Square className="w-3 h-3 fill-current" />
+                STOP
               </button>
             </div>
 
