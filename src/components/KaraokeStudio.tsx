@@ -1040,7 +1040,17 @@ export default function KaraokeStudio() {
           <div className="flex bg-seg-bg p-1 rounded-full border border-edge/20 light:border-edge">
             <button onClick={() => setActiveTab("MIXER")} className={`px-3 md:px-5 py-1.5 rounded-full text-xs font-medium transition-all ${activeTab === "MIXER" ? "bg-seg-active text-foreground font-semibold shadow-sm" : "text-muted hover:text-foreground"}`}>Mixer</button>
             <button onClick={() => setActiveTab("SYNC")} className={`px-3 md:px-5 py-1.5 rounded-full text-xs font-medium transition-all ${activeTab === "SYNC" ? "bg-seg-active text-foreground font-semibold shadow-sm" : "text-muted hover:text-foreground"}`}>Sync</button>
-            <button onClick={() => setActiveTab("EDIT")} className={`px-3 md:px-5 py-1.5 rounded-full text-xs font-medium transition-all ${activeTab === "EDIT" ? "bg-seg-active text-foreground font-semibold shadow-sm" : "text-muted hover:text-foreground"}`}>Edit</button>
+            <button 
+              onClick={() => { if (hasSyncedLines) setActiveTab("EDIT"); }} 
+              disabled={!hasSyncedLines}
+              className={`px-3 md:px-5 py-1.5 rounded-full text-xs font-medium transition-all ${
+                activeTab === "EDIT" ? "bg-seg-active text-foreground font-semibold shadow-sm" : 
+                !hasSyncedLines ? "text-muted/40 cursor-not-allowed" : "text-muted hover:text-foreground"
+              }`}
+              title={!hasSyncedLines ? "Sync lyrics first to unlock" : ""}
+            >
+              Edit
+            </button>
           </div>
         </div>
 
