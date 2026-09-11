@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import WaveformEditor from "./WaveformEditor";
+import WaveformEditor from "@/components/shared/WaveformEditor";
 
 
 import { Upload, Headphones, Mic, Play, Pause, Square, Settings2, Download, CheckCircle2, Volume2, Mic2, FileText, RotateCcw, Target, Plus, Minus, Save, FolderOpen, Trash2, Sun, Moon } from 'lucide-react';
@@ -287,6 +287,7 @@ export default function KaraokeStudio() {
 
   type Tab = "MIXER" | "SYNC" | "EDIT";
   const [activeTab, setActiveTab] = useState<Tab>("MIXER");
+  const [showMobileMixer, setShowMobileMixer] = useState(false);
   const [activeLineIndex, setActiveLineIndex] = useState(0);
   const [isSpacebarDown, setIsSpacebarDown] = useState(false);
   const [isSyncSessionActive, setIsSyncSessionActive] = useState(false);
@@ -424,7 +425,7 @@ export default function KaraokeStudio() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateSetting = (key: keyof MixSettings, value: any) => {
-    setMixSettings(prev => ({ ...prev, [key]: value }));
+    setMixSettings((prev: MixSettings) => ({ ...prev, [key]: value }));
   };
 
   const handleTrackUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -934,7 +935,7 @@ export default function KaraokeStudio() {
       trackVolume: effectiveTrackVolume,
       vocalVolume: effectiveVocalVolume,
       exportMode: mode as 'full' | 'recorded'
-    }).then(blob => {
+    }).then((blob: Blob | null) => {
       if (blob) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -1173,13 +1174,13 @@ export default function KaraokeStudio() {
 
       {/* HEADER */}
       {trackFile && (
-      <header className="shrink-0 flex flex-col md:flex-row md:items-center md:justify-between border-b border-edge/20 light:border-edge bg-panel px-3 md:px-8 py-2 md:py-0 md:h-14 gap-2 md:gap-0 shadow-sm z-10 overflow-hidden">
+      <header className="shrink-0 flex flex-col md:flex-row md:items-center md:justify-between border-b border-edge/20 light:border-edge bg-panel pl-[72px] pr-3 py-2 md:px-8 md:py-0 md:h-14 gap-2 md:gap-0 shadow-sm z-10 overflow-hidden">
         
         {/* LEFT SIDE: Brand & Tabs */}
         <div className="flex items-center justify-between gap-3 md:gap-6 z-10">
           <h1 className="text-base md:text-lg font-black tracking-tighter text-foreground flex items-center gap-2">
             <Mic2 className="w-5 h-5 text-foreground" />
-            <span className="hidden sm:inline">KARAOKE STUDIO</span>
+            <span className="hidden md:inline">KARAOKE STUDIO</span><span className="inline md:hidden">KARAOKE</span>
           </h1>
           
           <div className="hidden md:block h-6 w-px bg-control" />
@@ -1191,7 +1192,7 @@ export default function KaraokeStudio() {
               className="tour-step-3 px-3 md:px-5 py-1.5 rounded-full text-xs font-medium transition-all bg-seg-active text-foreground font-semibold shadow-sm hover:text-foreground flex items-center gap-2"
             >
               <FileText className="w-4 h-4 text-[#38bdf8]" />
-              Import Lyrics (.LRC, .SRT, .VTT)
+              <span className="hidden md:inline">Import Lyrics (.LRC, .SRT, .VTT)</span><span className="md:hidden text-[10px]">Import</span>
             </button>
           </div>
         </div>
@@ -1213,7 +1214,7 @@ export default function KaraokeStudio() {
                 title="Play/Pause Preview"
               >
                 {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current" />}
-                {isPlaying ? "PAUSE PREVIEW" : "PREVIEW MIX"}
+                <span className="hidden md:inline">{isPlaying ? "PAUSE PREVIEW" : "PREVIEW MIX"}</span><span className="md:hidden">{isPlaying ? "PAUSE" : "PREVIEW"}</span>
               </button>
 
               <button 
@@ -1227,7 +1228,7 @@ export default function KaraokeStudio() {
                 title="Record"
               >
                 {isRecording ? <Square className="w-3 h-3 fill-current" /> : <div className="w-3 h-3 rounded-full bg-[#ef4444]" />}
-                {isRecording ? "STOP RECORDING" : "START RECORDING"}
+                <span className="hidden md:inline">{isRecording ? "STOP RECORDING" : "START RECORDING"}</span><span className="md:hidden">{isRecording ? "STOP" : "RECORD"}</span>
               </button>
             </div>
 
@@ -1238,18 +1239,18 @@ export default function KaraokeStudio() {
                   setRunTour(false);
                   setTimeout(() => setRunTour(true), 10);
                 }}
-                className="w-10 h-10 shrink-0 rounded-full bg-transparent border border-edge/20 light:border-edge text-muted hover:text-foreground hover:bg-control flex items-center justify-center transition-colors font-bold text-sm"
+                className="hidden md:flex w-10 h-10 shrink-0 rounded-full bg-transparent border border-edge/20 light:border-edge text-muted hover:text-foreground hover:bg-control flex items-center justify-center transition-colors font-bold text-sm"
                 title="How to use this app"
               >
                 ?
               </button>
               <button 
                 onClick={handleNewSession}
-                className="px-4 md:px-5 py-2 bg-transparent border border-red-500/30 text-red-500 hover:bg-red-500/10 rounded-full text-xs font-bold transition-all flex items-center gap-2"
+                className="p-2 md:px-5 md:py-2 bg-transparent border border-red-500/30 text-red-500 hover:bg-red-500/10 rounded-full text-xs font-bold transition-all flex items-center gap-2"
                 title="Clear all and start fresh"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Start Over</span>
+                <span className="hidden md:inline">Start Over</span>
               </button>
             </div>
           </div>
@@ -1416,9 +1417,22 @@ export default function KaraokeStudio() {
               })()
             )}
 
+          
+          {/* MOBILE MIXER TOGGLE */}
+          <div className="md:hidden w-full flex justify-center mt-2 mb-2">
+            <button 
+              onClick={() => setShowMobileMixer(!showMobileMixer)}
+              className="w-full py-3 rounded-xl border border-edge/20 bg-panel text-secondary font-bold text-sm flex items-center justify-center gap-2 shadow-sm"
+            >
+              <Volume2 className="w-4 h-4" />
+              {showMobileMixer ? "Hide Mixer Settings" : "Adjust Volumes & Echo"}
+            </button>
+          </div>
+
+          <div className={`space-y-6 ${showMobileMixer ? 'block' : 'hidden md:block'}`}>
           {/* TRACK 1: BACKING TRACK */}
           <div className="tour-step-1 flex flex-col md:flex-row md:h-32 border border-edge/20 light:border-edge bg-panel rounded-xl overflow-hidden shadow-sm">
-            <div className="w-full md:w-[320px] p-4 md:p-5 flex flex-col justify-center md:justify-between items-stretch gap-4 md:gap-3 border-b md:border-b-0 md:border-r border-edge/20 light:border-edge shrink-0 bg-panel">
+            <div className="w-full md:w-[320px] p-3 md:p-5 flex flex-col justify-center md:justify-between items-stretch gap-4 md:gap-3 border-b md:border-b-0 md:border-r border-edge/20 light:border-edge shrink-0 bg-panel">
               <div className="w-full flex flex-col gap-1 min-w-0">
                 <div className="flex justify-between items-center w-full min-w-0">
                   <div className="flex items-center gap-2 overflow-hidden pr-2 min-w-0 shrink">
@@ -1518,7 +1532,7 @@ export default function KaraokeStudio() {
 
           {/* TRACK 2: VOCALS */}
           <div className="flex flex-col md:flex-row md:h-32 border border-edge/20 light:border-edge bg-panel rounded-xl overflow-hidden shadow-sm">
-            <div className="w-full md:w-[320px] p-4 md:p-5 flex flex-col justify-center md:justify-between items-stretch gap-4 md:gap-3 border-b md:border-b-0 md:border-r border-edge/20 light:border-edge shrink-0 bg-panel">
+            <div className="w-full md:w-[320px] p-3 md:p-5 flex flex-col justify-center md:justify-between items-stretch gap-4 md:gap-3 border-b md:border-b-0 md:border-r border-edge/20 light:border-edge shrink-0 bg-panel">
               <div className="w-full flex flex-col gap-1 min-w-0">
                 <div className="flex justify-between items-center w-full min-w-0">
                   <div className="flex items-center gap-2 overflow-hidden pr-2 min-w-0 shrink">
@@ -1693,6 +1707,7 @@ export default function KaraokeStudio() {
             </div>
           </div>
 
+          </div>
           {/* Export Audio Button - At bottom of Mixer */}
           <div className="flex justify-center mt-4 mb-6 md:mb-2 shrink-0">
             <button

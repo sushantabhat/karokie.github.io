@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { useAudioMixer } from "@/hooks/useAudioMixer";
 import { useTheme } from "@/hooks/useTheme";
-import WaveformEditor from "./WaveformEditor";
+import WaveformEditor from "@/components/shared/WaveformEditor";
 
 export type LineSync = { id: string; text: string; start: number | null; end: number | null; };
 
@@ -362,7 +362,7 @@ export function LyricsSyncTool() {
     return (
       <div className="h-full w-full flex flex-col bg-background text-foreground">
         {/* Header */}
-        <header className="flex-none p-4 border-b border-edge/20 bg-panel flex items-center justify-between">
+        <header className="flex-none pl-[72px] pr-4 py-4 border-b border-edge/20 bg-panel flex items-center justify-between">
           <div className="flex items-center gap-2 font-medium">
             <Music className="w-5 h-5 text-secondary" />
             <span className="truncate max-w-[200px] sm:max-w-md">{trackFile?.name || "Audio Track"}</span>

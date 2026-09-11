@@ -1,4 +1,4 @@
-import VoiceChangerTool from '@/components/VoiceChangerTool';
+import VoiceChangerTool from '@/components/recorder/VoiceChangerTool';
 
 export const metadata = {
   title: 'Voice Changer - Karaoke Studio',

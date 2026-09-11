@@ -349,7 +349,7 @@ export default function VoiceChangerTool() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-background p-4 md:p-8">
+    <div className="flex-1 overflow-y-auto bg-background pt-16 px-4 pb-4 md:p-8">
       <div className="max-w-4xl mx-auto space-y-8">
         
         {/* Header */}
@@ -385,11 +385,7 @@ export default function VoiceChangerTool() {
             {!recordedBlob ? (
               <div className="flex flex-col items-center gap-4">
                 <button
-                  onMouseDown={startRecording}
-                  onMouseUp={stopRecording}
-                  onMouseLeave={stopRecording}
-                  onTouchStart={startRecording}
-                  onTouchEnd={stopRecording}
+                  onClick={isRecording ? stopRecording : startRecording}
                   className={`w-32 h-32 rounded-full flex flex-col items-center justify-center gap-2 transition-all duration-300 ${
                     isRecording 
                       ? 'bg-red-500 text-white shadow-[0_0_40px_rgba(239,68,68,0.6)] scale-110' 
@@ -397,10 +393,10 @@ export default function VoiceChangerTool() {
                   }`}
                 >
                   {isRecording ? <Square className="w-10 h-10 fill-current" /> : <Mic className="w-10 h-10" />}
-                  <span className="font-bold text-sm tracking-widest">{isRecording ? "RECORDING" : "HOLD TO RECORD"}</span>
+                  <span className="font-bold text-sm tracking-widest">{isRecording ? "STOP RECORDING" : "TAP TO RECORD"}</span>
                 </button>
-                {isRecording && <div className="text-red-400 font-bold animate-pulse">Speak now...</div>}
-                {!isRecording && <div className="text-muted text-sm max-w-xs mt-2">Hold down the button, say something funny, and release when done!</div>}
+                {isRecording && <div className="text-red-400 font-bold animate-pulse mt-2">Recording... Tap to stop.</div>}
+                {!isRecording && <div className="text-muted text-sm max-w-xs text-center mt-2">Tap the button, say something funny, and tap again when done!</div>}
               </div>
             ) : (
               <div className="flex flex-col items-center gap-6 w-full max-w-lg bg-black/40 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-xl">

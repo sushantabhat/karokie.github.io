@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Mic2, Music, CircleDot, HelpCircle, Menu, X, MessageCircle, Moon, Sun } from "lucide-react";
+import { Mic2, Music, CircleDot, HelpCircle, Menu, X, MessageCircle, Moon, Sun, Scissors, Link as LinkIcon, Wand2, Activity } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 
 export function Sidebar() {
@@ -15,14 +15,17 @@ export function Sidebar() {
     { name: "Karaoke", href: "/karaoke", icon: Mic2, disabled: false },
     { name: "Lyrics Sync", href: "/sync", icon: Music, disabled: false },
     { name: "Voice Changer", href: "/recorder", icon: CircleDot, disabled: false, badge: "" },
+    // Adding placeholders for the tools shown in the user's reference image
+    { name: "Splitter", href: "/#", icon: Wand2, disabled: true, badge: "SOON" },
+    { name: "Pitcher", href: "/#", icon: Activity, disabled: true, badge: "SOON" },
+    { name: "Cutter", href: "/#", icon: Scissors, disabled: true, badge: "SOON" },
+    { name: "Joiner", href: "/#", icon: LinkIcon, disabled: true, badge: "SOON" },
   ];
 
   const bottomLinks = [
     { name: "About", href: "/about", icon: HelpCircle },
     { name: "Discord", href: "https://discord.gg/PG4ePQWTDh", icon: MessageCircle, external: true },
   ];
-
-  const isKaraokePage = pathname === "/karaoke";
 
   return (
     <>
@@ -104,34 +107,85 @@ export function Sidebar() {
         </div>
       </aside>
 
-      {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-[64px] bg-panel border-t border-edge/20 z-50 flex items-center justify-around px-2 pb-safe">
-        {[...tools, { name: "About", href: "/about", icon: HelpCircle }].map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href;
+      {/* Mobile Hamburger Button (Floating) */}
+      <button 
+        onClick={() => setMobileMenuOpen(true)}
+        className="md:hidden fixed top-3 left-3 z-40 p-2 rounded-lg bg-panel border border-edge/20 shadow-sm text-foreground hover:bg-control"
+      >
+        <Menu className="w-6 h-6" />
+      </button>
+
+      {/* Mobile Fullscreen Overlay */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-50 bg-[#121318] text-white flex flex-col overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
           
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors
-                ${isActive ? "text-[#38bdf8]" : "text-muted hover:text-foreground"}`}
+          {/* Overlay Header */}
+          <div className="flex items-center justify-between p-4 border-b border-white/5">
+            <button onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-white/5 rounded-lg transition-colors">
+              <Menu className="w-6 h-6" />
+            </button>
+            <div className="flex items-center gap-4">
+              <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-white/5 rounded-lg transition-colors">
+                <HelpCircle className="w-6 h-6" />
+              </Link>
+              <button onClick={toggleTheme} className="p-2 hover:bg-white/5 rounded-lg transition-colors">
+                {theme === 'dark' ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Grid of Tools */}
+          <div className="p-4 grid grid-cols-2 gap-3">
+            {tools.map((tool) => {
+              const Icon = tool.icon;
+              const isActive = pathname === tool.href;
+
+              return (
+                <Link
+                  key={tool.name}
+                  href={tool.disabled ? '#' : tool.href}
+                  onClick={(e) => {
+                    if (tool.disabled) {
+                      e.preventDefault();
+                      return;
+                    }
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`relative flex flex-col items-center justify-center aspect-square rounded-xl transition-all
+                    ${isActive 
+                      ? "bg-[#181a24] border border-[#6b7280] shadow-[0_0_15px_rgba(255,255,255,0.05)]" 
+                      : "bg-[#181a24]/50 border border-transparent hover:bg-[#181a24]"
+                    }
+                    ${tool.disabled ? "opacity-50 cursor-not-allowed" : ""}
+                  `}
+                >
+                  {tool.disabled && (
+                    <div className="absolute top-2 right-2 bg-white/10 text-white/50 text-[9px] px-1.5 py-0.5 rounded font-bold tracking-wider">
+                      {tool.badge}
+                    </div>
+                  )}
+                  <Icon className="w-8 h-8 mb-3 opacity-90" strokeWidth={1.5} />
+                  <span className="text-sm font-medium tracking-tight opacity-90">{tool.name}</span>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Mobile Overlay Footer (Discord, etc) */}
+          <div className="mt-auto p-4 flex justify-center pb-8">
+            <Link 
+              href="https://discord.gg/PG4ePQWTDh" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors"
             >
-              <Icon className={`w-5 h-5 ${isActive ? 'fill-[#38bdf8]/20' : ''}`} />
-              <span className="text-[10px] font-medium leading-none">{item.name}</span>
+              <MessageCircle className="w-5 h-5" />
+              Join our Discord
             </Link>
-          );
-        })}
-        
-        {/* Mobile Theme Toggle */}
-        <button
-          onClick={toggleTheme}
-          className="flex flex-col items-center justify-center w-full h-full space-y-1 text-muted hover:text-foreground transition-colors"
-        >
-          {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          <span className="text-[10px] font-medium leading-none">Theme</span>
-        </button>
-      </nav>
+          </div>
+
+        </div>
+      )}
     </>
   );
 }
