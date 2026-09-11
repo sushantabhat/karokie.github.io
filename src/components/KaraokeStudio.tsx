@@ -1010,7 +1010,7 @@ export default function KaraokeStudio() {
         </div>
       )}
 
-      <div className="h-screen flex flex-col bg-background text-foreground font-sans relative overflow-hidden">
+      <div className="h-[100dvh] flex flex-col bg-background text-foreground font-sans relative overflow-hidden">
       {isCountingIn && (
         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm pointer-events-auto">
           {countdown !== null && countdown > 0 && (
@@ -1334,10 +1334,10 @@ export default function KaraokeStudio() {
                   onSeekStart={handleSeekStart} onSeekDrag={handleSeekDrag} onSeekEnd={handleSeekEnd}
                 />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-full h-full flex items-center justify-center min-h-[100px] p-4">
                   <button 
                     onClick={() => document.getElementById('file-upload')?.click()}
-                    className="border-2 border-dashed border-edge/20 light:border-edge px-6 py-2.5 rounded-xl text-sm font-medium text-secondary hover:bg-panel hover:border-[#38bdf8] hover:text-foreground transition-all"
+                    className="border-2 border-dashed border-edge/20 light:border-edge px-4 md:px-6 py-2.5 rounded-xl text-xs md:text-sm font-medium text-secondary hover:bg-panel hover:border-[#38bdf8] hover:text-foreground transition-all w-full md:w-auto text-center"
                   >
                     Click to Load Instrumental Track
                   </button>
@@ -1524,7 +1524,7 @@ export default function KaraokeStudio() {
           </div>
 
           {/* Export Audio Button - At bottom of Mixer */}
-          <div className="flex justify-center mt-4 mb-2">
+          <div className="flex justify-center mt-4 mb-6 md:mb-2 shrink-0">
             <button
               onClick={handleExportClick}
               disabled={isProcessing || !recordedBlob}
