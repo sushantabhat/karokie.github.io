@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
-import { MaintenanceOverlay } from "@/components/MaintenanceOverlay";
 
 export const metadata: Metadata = {
   title: "Karaoke Studio",
@@ -19,7 +18,6 @@ export default function RootLayout({ children }: LayoutProps) {
       className="h-full antialiased bg-[#0B0F17] text-white min-h-screen m-0 p-0"
     >
       <body className="min-h-full flex flex-col relative bg-[#0B0F17] text-white m-0 p-0">
-        <MaintenanceOverlay />
         {children}
         <Analytics />
       </body>
