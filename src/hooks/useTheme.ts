@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 export type Theme = 'dark' | 'light';
 
-const STORAGE_KEY = 'karaokeTheme';
+const STORAGE_KEY = 'karaokeTheme_v2';
 
 function getSavedTheme(): Theme {
   if (typeof window === 'undefined') return 'dark';
