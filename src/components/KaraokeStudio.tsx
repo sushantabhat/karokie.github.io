@@ -1015,6 +1015,14 @@ export default function KaraokeStudio() {
       )}
 
       <div className="h-[100dvh] flex flex-col bg-background text-foreground font-sans relative overflow-hidden">
+        {/* Neon Background Accents */}
+        {theme === 'dark' && (
+          <>
+            <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-600/20 blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-cyan-600/20 blur-[120px] pointer-events-none" />
+            <div className="absolute top-[40%] left-[30%] w-[30%] h-[30%] rounded-full bg-blue-600/10 blur-[100px] pointer-events-none" />
+          </>
+        )}
       {isCountingIn && (
         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm pointer-events-auto">
           {countdown !== null && countdown > 0 && (
@@ -1029,10 +1037,10 @@ export default function KaraokeStudio() {
       )}
 
       {/* HEADER */}
-      <header className="shrink-0 flex flex-col md:flex-row md:items-center md:justify-between border-b border-edge/20 light:border-edge bg-panel px-3 md:px-8 py-2 md:py-0 md:h-16 gap-2 md:gap-0 shadow-sm z-10 overflow-hidden">
+      <header className="shrink-0 flex flex-col md:flex-row md:items-center md:justify-between border-b border-edge/20 light:border-edge bg-panel/60 backdrop-blur-xl px-3 md:px-8 py-2 md:py-0 md:h-16 gap-2 md:gap-0 shadow-lg z-10 overflow-hidden">
         
         {/* LEFT SIDE: Brand & Tabs */}
-        <div className="flex items-center justify-between gap-3 md:gap-6">
+        <div className="flex items-center justify-between gap-3 md:gap-6 z-10">
           <h1 className="text-base md:text-lg font-black tracking-tighter text-foreground flex items-center gap-2">
             <Mic2 className="w-5 h-5 text-foreground" />
             <span className="hidden sm:inline">KARAOKE STUDIO</span>
@@ -1255,8 +1263,8 @@ export default function KaraokeStudio() {
             )}
 
           {/* TRACK 1: BACKING TRACK */}
-          <div className="flex flex-col md:flex-row md:h-36 border border-edge/20 light:border-edge bg-panel rounded-xl overflow-hidden shadow-sm">
-            <div className="w-full md:w-72 p-4 md:p-5 flex flex-col justify-center md:justify-between items-stretch gap-4 md:gap-3 border-b md:border-b-0 md:border-r border-edge/20 light:border-edge shrink-0 bg-panel">
+          <div className="flex flex-col md:flex-row md:h-36 border border-edge/20 light:border-edge bg-panel/60 backdrop-blur-xl rounded-xl overflow-hidden shadow-xl z-10 relative">
+            <div className="w-full md:w-72 p-4 md:p-5 flex flex-col justify-center md:justify-between items-stretch gap-4 md:gap-3 border-b md:border-b-0 md:border-r border-edge/20 light:border-edge shrink-0 bg-transparent">
               <div className="w-full flex flex-col gap-1 min-w-0">
                 <div className="flex justify-between items-center w-full">
                   <div className="flex items-center gap-2 overflow-hidden pr-2">
@@ -1352,8 +1360,8 @@ export default function KaraokeStudio() {
           </div>
 
           {/* TRACK 2: VOCALS */}
-          <div className="flex flex-col md:flex-row md:h-36 border border-edge/20 light:border-edge bg-panel rounded-xl overflow-hidden shadow-sm">
-            <div className="w-full md:w-72 p-4 md:p-5 flex flex-col justify-center md:justify-between items-stretch gap-4 md:gap-3 border-b md:border-b-0 md:border-r border-edge/20 light:border-edge shrink-0 bg-panel">
+          <div className="flex flex-col md:flex-row md:h-36 border border-edge/20 light:border-edge bg-panel/60 backdrop-blur-xl rounded-xl overflow-hidden shadow-xl z-10 relative">
+            <div className="w-full md:w-72 p-4 md:p-5 flex flex-col justify-center md:justify-between items-stretch gap-4 md:gap-3 border-b md:border-b-0 md:border-r border-edge/20 light:border-edge shrink-0 bg-transparent">
               <div className="w-full flex flex-col gap-1 min-w-0">
                 <div className="flex justify-between items-center w-full">
                   <div className="flex items-center gap-2 overflow-hidden pr-2">
@@ -1459,7 +1467,7 @@ export default function KaraokeStudio() {
           </div>
 
           {/* MASTER BUS SETTINGS (Docked at bottom) */}
-          <div className="p-4 md:p-6 bg-panel border border-edge/20 light:border-edge rounded-xl flex flex-col md:flex-row gap-6 md:gap-8 shadow-sm">
+          <div className="p-4 md:p-6 bg-panel/60 backdrop-blur-xl border border-edge/20 light:border-edge rounded-xl flex flex-col md:flex-row gap-6 md:gap-8 shadow-xl z-10 relative">
             <div className="flex-1">
               <h3 className="text-xs font-bold text-secondary uppercase tracking-wider mb-4 flex items-center gap-2">
                 ⏱️ Sync & Mic Delay
@@ -1532,7 +1540,7 @@ export default function KaraokeStudio() {
             <button
               onClick={handleExportClick}
               disabled={isProcessing || !recordedBlob}
-              className="w-full md:w-auto px-12 py-3 bg-foreground text-background hover:scale-[1.02] active:scale-[0.98] rounded-full text-base font-bold transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 shadow-lg"
+              className="w-full md:w-auto px-12 py-3 bg-gradient-to-r from-[#00E5FF] to-[#F43F5E] text-white hover:scale-[1.02] active:scale-[0.98] rounded-full text-base font-black transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(0,229,255,0.4)] hover:shadow-[0_0_40px_rgba(244,63,94,0.6)] z-10"
             >
               {isProcessing ? 'Processing Mix...' : 'Export Final Audio'}
             </button>

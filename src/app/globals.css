@@ -3,25 +3,25 @@
 @custom-variant light (&:where([data-theme="light"], [data-theme="light"] *));
 
 :root {
-  /* Dark (default) theme */
-  --background: #0B0E14;
-  --foreground: #fafafa;
-  --panel: #161B22;
-  --control: #1f222b;
-  --control-hover: #272a35;
-  --edge: #3f3f46;
+  /* Neon Studio (Dark) theme */
+  --background: #05050a;
+  --foreground: #ffffff;
+  --panel: rgba(255, 255, 255, 0.04);
+  --control: rgba(255, 255, 255, 0.08);
+  --control-hover: rgba(255, 255, 255, 0.15);
+  --edge: rgba(255, 255, 255, 0.1);
   --muted: #a1a1aa;
-  --secondary: #71717a;
-  --wave-bg: #121214;
-  --input-text: #ededed;
-  --slider-track: #272a35;
-  --slider-fill: #0ea5e9;
-  --slider-thumb: #f4f4f5;
+  --secondary: #d4d4d8;
+  --wave-bg: rgba(0, 0, 0, 0.2);
+  --input-text: #ffffff;
+  --slider-track: rgba(255, 255, 255, 0.1);
+  --slider-fill: #00E5FF;
+  --slider-thumb: #ffffff;
   --wave-track: #00E5FF;
-  --wave-vocal: #8B5CF6;
-  --seg-bg: #181b21;
-  --seg-active: #272a35;
-  --lyric-inactive: #71717a;
+  --wave-vocal: #F43F5E;
+  --seg-bg: rgba(0, 0, 0, 0.2);
+  --seg-active: rgba(255, 255, 255, 0.1);
+  --lyric-inactive: #52525b;
 }
 
 [data-theme="light"] {
