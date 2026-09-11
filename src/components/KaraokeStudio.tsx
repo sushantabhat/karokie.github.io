@@ -13,6 +13,7 @@ import { useAudioMixer, MixSettings } from '@/hooks/useAudioMixer';
 import { useTheme } from '@/hooks/useTheme';
 import { saveTrackToDB, getTrackFromDB, saveVocalToDB, getVocalFromDB } from '@/utils/indexedDB';
 import { audioBufferToWav } from '@/utils/audioBufferToWav';
+import { track } from "@vercel/analytics";
 
 const readVar = (name: string) =>
   typeof window !== 'undefined'
@@ -368,6 +369,7 @@ export default function KaraokeStudio() {
       setTrackFile(file);
       const url = URL.createObjectURL(file);
       setTrackUrl(url);
+      track('Loaded Instrumental');
       // Compute hash, load any saved lyrics, and set toast flag
       const hash = await hashFile(file);
       setTrackHash(hash);
@@ -388,6 +390,7 @@ export default function KaraokeStudio() {
   const handleLRCUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      track('Imported LRC');
       const reader = new FileReader();
       reader.onload = (ev) => {
         let absIdx = 0;
@@ -811,6 +814,7 @@ export default function KaraokeStudio() {
       ]
     });
     if (!mode) return;
+    track('Exported Final Audio', { mode });
 
     exportMix({
       ...mixSettings,
