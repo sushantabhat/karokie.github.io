@@ -3,6 +3,13 @@
 import React, { useState, useRef } from "react";
 import { Upload, Music, Play, Square, Download, Sparkles, RefreshCcw, Activity, Wand2, CheckCircle2 } from "lucide-react";
 import { audioBufferToWav } from "@/utils/audioBufferToWav";
+import { audioBufferToMp3 } from "@/utils/audioBufferToMp3";
+
+declare global {
+  interface Window {
+    webkitAudioContext: typeof AudioContext;
+  }
+}
 
 export default function SplitterTool() {
   const [file, setFile] = useState<File | null>(null);
@@ -10,6 +17,9 @@ export default function SplitterTool() {
   const [progress, setProgress] = useState(0);
   const [instrumentalUrl, setInstrumentalUrl] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [format, setFormat] = useState<'wav' | 'mp3'>('mp3');
+  const [isExporting, setIsExporting] = useState(false);
+  const renderedBufferRef = useRef<AudioBuffer | null>(null);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -18,6 +28,7 @@ export default function SplitterTool() {
     if (uploadedFile) {
       setFile(uploadedFile);
       setInstrumentalUrl(null);
+      renderedBufferRef.current = null;
     }
   };
 
@@ -30,7 +41,7 @@ export default function SplitterTool() {
       const arrayBuffer = await file.arrayBuffer();
       setProgress(30);
 
-      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
       setProgress(60);
 
@@ -97,6 +108,7 @@ export default function SplitterTool() {
 
       setProgress(80);
       const renderedBuffer = await offlineCtx.startRendering();
+      renderedBufferRef.current = renderedBuffer;
       
       setProgress(95);
       const wavBlob = audioBufferToWav(renderedBuffer);
@@ -124,12 +136,34 @@ export default function SplitterTool() {
     setIsPlaying(!isPlaying);
   };
 
-  const downloadTrack = () => {
+  const downloadTrack = async () => {
     if (!instrumentalUrl) return;
-    const a = document.createElement("a");
-    a.href = instrumentalUrl;
-    a.download = `Instrumental_${file?.name || 'track.wav'}`;
-    a.click();
+    setIsExporting(true);
+    // Give UI time to update
+    await new Promise(r => setTimeout(r, 50));
+    
+    try {
+      let finalUrl = instrumentalUrl;
+      const baseName = (file?.name || 'track').replace(/\.[^/.]+$/, "");
+      let ext = format;
+      
+      if (format === 'mp3' && renderedBufferRef.current) {
+        const mp3Blob = await audioBufferToMp3(renderedBufferRef.current);
+        finalUrl = URL.createObjectURL(mp3Blob);
+      } else {
+        ext = 'wav'; // fallback
+      }
+
+      const a = document.createElement("a");
+      a.href = finalUrl;
+      a.download = `Instrumental_${baseName}.${ext}`;
+      a.click();
+    } catch (e) {
+      console.error(e);
+      alert("Error encoding format");
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
@@ -214,19 +248,38 @@ export default function SplitterTool() {
               {isPlaying ? <Square className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-1" />}
             </button>
 
-            <button
-              onClick={downloadTrack}
-              className="flex-1 h-16 rounded-xl flex items-center justify-center gap-2 bg-control hover:bg-control-hover border border-edge/20 text-foreground font-bold transition-all hover:scale-[1.02]"
-            >
-              <Download className="w-5 h-5" />
-              Download MP3
-            </button>
+            <div className="flex-1 flex items-center gap-2">
+              <div className="flex flex-col bg-panel border border-edge/20 rounded-xl overflow-hidden shadow-sm h-16 shrink-0">
+                <button 
+                  onClick={() => setFormat('mp3')} 
+                  className={`flex-1 px-3 text-xs font-bold transition-all ${format === 'mp3' ? 'bg-[#38bdf8] text-black' : 'text-secondary hover:text-foreground hover:bg-white/5'}`}
+                >
+                  MP3
+                </button>
+                <div className="h-[1px] w-full bg-edge/20"></div>
+                <button 
+                  onClick={() => setFormat('wav')} 
+                  className={`flex-1 px-3 text-xs font-bold transition-all ${format === 'wav' ? 'bg-[#38bdf8] text-black' : 'text-secondary hover:text-foreground hover:bg-white/5'}`}
+                >
+                  WAV
+                </button>
+              </div>
+              <button
+                onClick={downloadTrack}
+                disabled={isExporting}
+                className="flex-1 h-16 rounded-xl flex items-center justify-center gap-2 bg-control hover:bg-control-hover border border-edge/20 text-foreground font-bold transition-all hover:scale-[1.02] disabled:opacity-50"
+              >
+                <Download className="w-5 h-5" />
+                {isExporting ? 'Encoding...' : 'Save'}
+              </button>
+            </div>
           </div>
 
           <button
             onClick={() => {
               setInstrumentalUrl(null);
               setFile(null);
+              renderedBufferRef.current = null;
             }}
             className="text-red-400 hover:text-red-300 text-sm font-bold flex items-center gap-2 transition-colors"
           >

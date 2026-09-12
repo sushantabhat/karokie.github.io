@@ -1,8 +1,15 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Play, Square, Scissors, Trash2, Download, Plus, Music } from "lucide-react";
+import { Play, Square, Scissors, Trash2, Download, Plus, Music, ChevronUp, ChevronDown, RotateCcw, RotateCw } from "lucide-react";
 import { audioBufferToWav } from "@/utils/audioBufferToWav";
+import { audioBufferToMp3 } from "@/utils/audioBufferToMp3";
+
+declare global {
+  interface Window {
+    webkitAudioContext: typeof AudioContext;
+  }
+}
 
 interface Track {
   id: string;
@@ -14,17 +21,25 @@ interface Track {
 }
 
 // -------------------------------------------------------------
-// WaveformTrack: Visual Editor for a horizontal track
+// WaveformTrack: Visual Editor for a vertical track
 // -------------------------------------------------------------
 function WaveformTrack({ 
-  track, 
+  track,
+  index,
+  totalTracks,
   onUpdateTrim, 
   onRemove,
+  onMoveUp,
+  onMoveDown,
   audioCtx
 }: { 
-  track: Track; index?: number; totalTracks?: number; 
+  track: Track; 
+  index: number; 
+  totalTracks: number; 
   onUpdateTrim: (id: string, start: number, end: number) => void;
   onRemove: (id: string) => void;
+  onMoveUp: (index: number) => void;
+  onMoveDown: (index: number) => void;
   audioCtx: AudioContext;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -38,6 +53,13 @@ function WaveformTrack({
 
   const { buffer, trimStart, trimEnd, duration } = track;
 
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    const ms = Math.floor((seconds % 1) * 10);
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${ms}`;
+  };
+
   // Drawing the Waveform
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;
@@ -45,9 +67,9 @@ function WaveformTrack({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Fixed width for horizontal layout
+    // Fill container width dynamically
     const width = containerRef.current.clientWidth;
-    const height = 160; 
+    const height = 120; // Taller for vertical layout
     canvas.width = width * window.devicePixelRatio;
     canvas.height = height * window.devicePixelRatio;
     canvas.style.width = `${width}px`;
@@ -60,7 +82,8 @@ function WaveformTrack({
     const step = Math.ceil(data.length / width);
     const amp = height / 2;
 
-    ctx.fillStyle = "#0ea5e9"; // Bright Green
+    const startX = (trimStart / duration) * width;
+    const endX = (trimEnd / duration) * width;
 
     for (let i = 0; i < width; i++) {
       let min = 1.0;
@@ -72,33 +95,63 @@ function WaveformTrack({
       }
       const y = (1 + min) * amp;
       const h = Math.max(1, (max - min) * amp);
+
+      // Distinct styling for trimmed vs active regions
+      if (i >= startX && i <= endX) {
+        ctx.fillStyle = "#10b981"; // Bright Green (Emerald)
+      } else {
+        ctx.fillStyle = "#334155"; // Muted Slate for trimmed out parts
+      }
+      
       ctx.fillRect(i, y, 1, h);
     }
 
-    const startX = (trimStart / duration) * width;
-    const endX = (trimEnd / duration) * width;
-
-    // Dark Overlay for cut regions
-    ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+    // Draw teal brackets for the active trim region
+    ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; // Dark overlay
     ctx.fillRect(0, 0, startX, height);
     ctx.fillRect(endX, 0, width - endX, height);
 
-    // Teal Handles
-    ctx.fillStyle = "#38bdf8";
-    const handleWidth = 8;
-    ctx.fillRect(startX - handleWidth/2, 0, handleWidth, height);
-    ctx.fillRect(endX - handleWidth/2, 0, handleWidth, height);
+    // Left Handle (Teal with curved corners)
+    ctx.fillStyle = "#2dd4bf"; // Teal
+    const handleWidth = 12;
+    ctx.beginPath();
+    ctx.roundRect(startX, 0, handleWidth, height, [6, 0, 0, 6]);
+    ctx.fill();
 
-    // Playhead
+    // Right Handle
+    ctx.beginPath();
+    ctx.roundRect(endX - handleWidth, 0, handleWidth, height, [0, 6, 6, 0]);
+    ctx.fill();
+
+    // Inner lines on handles for grab effect
+    ctx.fillStyle = "#0f172a";
+    ctx.fillRect(startX + 4, height/2 - 10, 2, 20);
+    ctx.fillRect(startX + 8, height/2 - 10, 2, 20);
+    
+    ctx.fillRect(endX - handleWidth + 4, height/2 - 10, 2, 20);
+    ctx.fillRect(endX - handleWidth + 8, height/2 - 10, 2, 20);
+
+    // Playhead line
     if (isPlaying || currentTime > 0) {
-      const playheadX = (currentTime / duration) * width;
+      const playheadX = startX + ((currentTime / (trimEnd - trimStart)) * (endX - startX));
       ctx.fillStyle = "#ffffff";
-      ctx.fillRect(playheadX - 1, 0, 2, height);
+      ctx.fillRect(Math.min(playheadX, endX - 2), 0, 2, height);
+      
+      // Floating time bubble above playhead
+      ctx.fillStyle = "rgba(30, 41, 59, 0.9)";
+      ctx.beginPath();
+      ctx.roundRect(playheadX - 24, 4, 48, 20, 10);
+      ctx.fill();
+      ctx.fillStyle = "#fff";
+      ctx.font = "10px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(formatTime(trimStart + currentTime), playheadX, 18);
     }
+
   }, [buffer, trimStart, trimEnd, currentTime, isPlaying, duration]);
 
   // Dragging Logic
-  const [dragging, setDragging] = useState<'start' | 'end' | null>(null);
+  const [dragging, setDragging] = useState<'start' | 'end' | 'playhead' | null>(null);
 
   const handlePointerDown = (e: React.PointerEvent) => {
     if (!containerRef.current) return;
@@ -112,133 +165,191 @@ function WaveformTrack({
     } else if (Math.abs(clickTime - trimEnd) < margin) {
       setDragging('end');
     } else if (clickTime > trimStart && clickTime < trimEnd) {
-      setCurrentTime(clickTime);
+      const localTime = clickTime - trimStart;
+      setCurrentTime(localTime);
       if (isPlaying) {
         stopPlayback();
-        startPlayback(clickTime);
+        startPlayback(localTime);
       }
     }
   };
 
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!dragging || !containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-    const newTime = (x / rect.width) * duration;
+  useEffect(() => {
+    if (!dragging) return;
+    
+    const handlePointerMove = (e: PointerEvent) => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      let newTime = (x / rect.width) * duration;
+      newTime = Math.max(0, Math.min(newTime, duration));
 
-    if (dragging === 'start') {
-      onUpdateTrim(track.id, Math.min(newTime, trimEnd - 0.2), trimEnd);
-    } else {
-      onUpdateTrim(track.id, trimStart, Math.max(newTime, trimStart + 0.2));
-    }
-  };
+      const minClip = Math.min(0.1, duration * 0.9); // Clamp for very short clips
 
-  const handlePointerUp = () => setDragging(null);
+      if (dragging === 'start') {
+        onUpdateTrim(track.id, Math.min(newTime, trimEnd - minClip), trimEnd);
+      } else if (dragging === 'end') {
+        onUpdateTrim(track.id, trimStart, Math.max(newTime, trimStart + minClip));
+      }
+    };
 
-  // Playback
-  const startPlayback = (startAt = trimStart) => {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    stopPlayback();
+    const handlePointerUp = () => {
+      setDragging(null);
+    };
 
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerUp);
+    window.addEventListener('blur', handlePointerUp);
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerUp);
+      window.removeEventListener('blur', handlePointerUp);
+    };
+  }, [dragging, duration, trimStart, trimEnd, track.id, onUpdateTrim]);
+
+  // Playback Logic
+  const startPlayback = (startOffset = 0) => {
+    if (sourceNodeRef.current) sourceNodeRef.current.disconnect();
     const source = audioCtx.createBufferSource();
     source.buffer = buffer;
     source.connect(audioCtx.destination);
-    source.start(0, startAt);
-    startTimeRef.current = audioCtx.currentTime - startAt;
+    
+    source.start(0, trimStart + startOffset, (trimEnd - trimStart) - startOffset);
     sourceNodeRef.current = source;
+    startTimeRef.current = audioCtx.currentTime - startOffset;
     setIsPlaying(true);
+    
+    source.onended = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    };
 
-    const updatePlayhead = () => {
-      const current = audioCtx.currentTime - startTimeRef.current;
-      if (current >= trimEnd) {
-        stopPlayback();
-        setCurrentTime(trimStart);
-      } else {
-        setCurrentTime(current);
-        animationRef.current = requestAnimationFrame(updatePlayhead);
+    const updateTime = () => {
+      if (sourceNodeRef.current) {
+        setCurrentTime(audioCtx.currentTime - startTimeRef.current);
+        animationRef.current = requestAnimationFrame(updateTime);
       }
     };
-    animationRef.current = requestAnimationFrame(updatePlayhead);
+    animationRef.current = requestAnimationFrame(updateTime);
   };
 
   const stopPlayback = useCallback(() => {
     if (sourceNodeRef.current) {
-      try { sourceNodeRef.current.stop(); } catch(e) {}
+      sourceNodeRef.current.onended = null;
+      sourceNodeRef.current.stop();
       sourceNodeRef.current.disconnect();
+      sourceNodeRef.current = null;
     }
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
     setIsPlaying(false);
   }, []);
 
-  const togglePlayback = () => {
-    if (isPlaying) stopPlayback();
-    else startPlayback(currentTime < trimStart || currentTime >= trimEnd ? trimStart : currentTime);
+  const jump = (seconds: number) => {
+    const newTime = Math.max(0, Math.min(currentTime + seconds, trimEnd - trimStart));
+    setCurrentTime(newTime);
+    if (isPlaying) {
+      stopPlayback();
+      startPlayback(newTime);
+    }
   };
 
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = Math.floor(seconds % 60);
-    const ms = Math.floor((seconds % 1) * 10);
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${ms}`;
-  };
+  useEffect(() => {
+    return () => stopPlayback();
+  }, [stopPlayback]);
+
+
 
   return (
-    <div className="w-[600px] shrink-0 bg-black/30 rounded-xl overflow-hidden shadow-2xl border border-edge/50 flex flex-col group">
+    <div className="w-full bg-[#1e293b] rounded-2xl border border-edge/20 p-4 md:p-5 flex flex-col gap-4 shadow-sm relative overflow-hidden">
       
-      {/* Top Track Header */}
-      <div className="flex items-center justify-between px-4 py-2 bg-panel border-b border-edge/20">
-        <div className="flex items-center gap-3 overflow-hidden">
-          <button
-            onClick={togglePlayback}
-            className="w-8 h-8 shrink-0 rounded-full bg-[#38bdf8] hover:bg-[#0ea5e9] flex items-center justify-center transition-all"
-          >
-            {isPlaying ? <Square className="w-4 h-4 text-black" /> : <Play className="w-4 h-4 text-black ml-0.5" />}
-          </button>
-          <span className="text-sm font-bold text-foreground truncate">
-            {track.file.name}
+      {/* Header Row */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4 w-full">
+        <div className="flex-1 min-w-0 pr-8 md:pr-0">
+          <h3 className="text-sm font-bold text-foreground truncate break-all mb-0.5">
+            {index + 1}. {track.file.name}
+          </h3>
+          <span className="text-xs text-secondary font-medium">
+            Duration: {formatTime(trimEnd - trimStart)}
           </span>
         </div>
-        <button onClick={() => onRemove(track.id)} className="p-1.5 hover:bg-red-500/20 text-red-400 rounded-md shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+        
+        {/* Delete Button (absolute on mobile for top-right placement) */}
+        <button aria-label="Remove track"
+          onClick={() => onRemove(track.id)}
+          className="absolute top-4 right-4 md:relative md:top-0 md:right-0 w-8 h-8 rounded-full bg-red-500/10 text-red-400 hover:text-red-500 hover:bg-red-500/20 flex items-center justify-center shrink-0 transition-all"
+        >
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Waveform Canvas */}
+      {/* Waveform Row */}
       <div 
         ref={containerRef}
-        className="w-full h-[160px] relative touch-none cursor-crosshair bg-black/20"
+        className="relative w-full rounded-lg bg-black/40 overflow-hidden cursor-crosshair border border-black/20"
         onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerLeave={handlePointerUp}
       >
-        <canvas ref={canvasRef} className="absolute inset-0 block w-full h-full pointer-events-none" />
+        <canvas ref={canvasRef} className="block w-full touch-none" />
       </div>
+      
+      {/* Controls Row */}
+      <div className="flex flex-wrap md:flex-nowrap items-center justify-between gap-4 mt-1">
+         
+         {/* Reorder Arrows */}
+         <div className="flex items-center gap-1.5 shrink-0">
+           <button aria-label="Move track up"
+             onClick={() => onMoveUp(index)}
+             disabled={index === 0}
+             className="w-10 h-10 bg-black/20 border border-edge/10 rounded-xl flex items-center justify-center text-secondary hover:text-foreground hover:bg-black/40 disabled:opacity-30 disabled:pointer-events-none transition-all"
+           >
+             <ChevronUp className="w-5 h-5" />
+           </button>
+           <button aria-label="Move track down"
+             onClick={() => onMoveDown(index)}
+             disabled={index === totalTracks - 1}
+             className="w-10 h-10 bg-black/20 border border-edge/10 rounded-xl flex items-center justify-center text-secondary hover:text-foreground hover:bg-black/40 disabled:opacity-30 disabled:pointer-events-none transition-all"
+           >
+             <ChevronDown className="w-5 h-5" />
+           </button>
+         </div>
 
-      {/* Footer Info */}
-      <div className="flex justify-between px-3 py-1.5 text-[10px] text-muted bg-panel border-t border-edge/20 font-mono">
-        <span>Start: {formatTime(trimStart)}</span>
-        <span className="text-[#38bdf8] font-bold">Len: {formatTime(trimEnd - trimStart)}</span>
-        <span>End: {formatTime(trimEnd)}</span>
+         {/* Playback Controls (Centered on desktop, right aligned on mobile) */}
+         <div className="flex items-center gap-3 md:gap-6 mx-auto md:ml-auto md:mr-0 ml-auto">
+           <button onClick={() => jump(-10)} className="text-secondary hover:text-foreground transition-colors p-2 shrink-0" aria-label="Rewind 10 seconds" title="Rewind 10s">
+             <RotateCcw className="w-5 h-5 md:w-6 md:h-6" />
+           </button>
+           <button 
+             onClick={() => isPlaying ? stopPlayback() : startPlayback(0)}
+             aria-label={isPlaying ? "Pause" : "Play"}
+             className="w-12 h-12 md:w-14 md:h-14 bg-foreground text-background rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-transform shrink-0"
+           >
+             {isPlaying ? <Square className="w-5 h-5 md:w-6 md:h-6 fill-current" /> : <Play className="w-5 h-5 md:w-6 md:h-6 ml-1 fill-current" />}
+           </button>
+           <button onClick={() => jump(10)} className="text-secondary hover:text-foreground transition-colors p-2 shrink-0" aria-label="Forward 10 seconds" title="Forward 10s">
+             <RotateCw className="w-5 h-5 md:w-6 md:h-6" />
+           </button>
+         </div>
+         
+         {/* Empty spacer to balance flex on desktop if needed, but flex-wrap handles mobile */}
       </div>
+      
     </div>
   );
 }
 
 // -------------------------------------------------------------
-// CutterTool: Horizontal Timeline App
+// CutterTool: Vertical Timeline App
 // -------------------------------------------------------------
 export default function CutterTool() {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  
-  // Ref for the invisible file input
+  const [format, setFormat] = useState<'wav' | 'mp3'>('mp3');
+  const [audioCtx, setAudioCtx] = useState<AudioContext | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [insertTarget, setInsertTarget] = useState<number>(0);
 
-  const triggerUpload = (index: number) => {
-    setInsertTarget(index);
+  const triggerUpload = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = ''; // Reset
       fileInputRef.current.click();
@@ -249,15 +360,17 @@ export default function CutterTool() {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
 
-    if (!audioCtxRef.current) {
-      audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    let ctx = audioCtx;
+    if (!ctx) {
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      setAudioCtx(ctx);
     }
 
     try {
       const newTracks: Track[] = [];
       for (const file of files) {
         const arrayBuffer = await file.arrayBuffer();
-        const buffer = await audioCtxRef.current.decodeAudioData(arrayBuffer);
+        const buffer = await ctx.decodeAudioData(arrayBuffer);
         newTracks.push({
           id: Math.random().toString(36).substring(7),
           file,
@@ -268,12 +381,7 @@ export default function CutterTool() {
         });
       }
       
-      setTracks((prev) => {
-        const updated = [...prev];
-        updated.splice(insertTarget, 0, ...newTracks);
-        return updated;
-      });
-      
+      setTracks((prev) => [...prev, ...newTracks]);
     } catch (err) {
       console.error(err);
       alert("Error loading audio files.");
@@ -288,6 +396,24 @@ export default function CutterTool() {
     setTracks(tracks.filter(t => t.id !== id));
   };
 
+  const moveUp = (index: number) => {
+    if (index === 0) return;
+    setTracks(prev => {
+      const copy = [...prev];
+      [copy[index - 1], copy[index]] = [copy[index], copy[index - 1]];
+      return copy;
+    });
+  };
+
+  const moveDown = (index: number) => {
+    if (index === tracks.length - 1) return;
+    setTracks(prev => {
+      const copy = [...prev];
+      [copy[index + 1], copy[index]] = [copy[index], copy[index + 1]];
+      return copy;
+    });
+  };
+
   const processAndDownload = async () => {
     if (tracks.length === 0) return;
     setIsProcessing(true);
@@ -297,7 +423,7 @@ export default function CutterTool() {
       for (const t of tracks) totalDuration += (t.trimEnd - t.trimStart);
       
       const sampleRate = tracks[0].buffer.sampleRate;
-      const offlineCtx = new OfflineAudioContext(2, sampleRate * totalDuration, sampleRate);
+      const offlineCtx = new OfflineAudioContext(2, Math.ceil(sampleRate * totalDuration), sampleRate);
       
       let currentTime = 0;
       for (const track of tracks) {
@@ -310,12 +436,16 @@ export default function CutterTool() {
       }
 
       const renderedBuffer = await offlineCtx.startRendering();
-      const wavBlob = audioBufferToWav(renderedBuffer);
-      const url = URL.createObjectURL(wavBlob);
+      
+      const blob = format === 'mp3' 
+        ? await audioBufferToMp3(renderedBuffer) 
+        : audioBufferToWav(renderedBuffer);
+        
+      const url = URL.createObjectURL(blob);
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = tracks.length > 1 ? `Merged_Audio.wav` : `Cut_Audio.wav`;
+      a.download = tracks.length > 1 ? `Merged_Audio.${format}` : `Cut_Audio.${format}`;
       a.click();
     } catch (err) {
       console.error(err);
@@ -325,20 +455,10 @@ export default function CutterTool() {
     }
   };
 
-  // The Add Button UI
-  const AddButton = ({ index }: { index: number }) => (
-    <button 
-      onClick={() => triggerUpload(index)}
-      className="w-12 h-12 shrink-0 rounded-full border-2 border-dashed border-[#38bdf8]/50 hover:bg-[#38bdf8]/20 hover:border-[#38bdf8] flex items-center justify-center transition-all group"
-    >
-      <Plus className="w-6 h-6 text-[#38bdf8] group-hover:scale-125 transition-transform" />
-    </button>
-  );
-
   return (
-    <div className="flex-1 w-full h-full bg-background flex flex-col font-sans text-foreground relative">
+    <div className="flex-1 w-full h-full bg-background flex flex-col font-sans text-foreground relative min-h-0">
       
-      {/* Hidden file input used by all + buttons */}
+      {/* Hidden file input used by + buttons */}
       <input 
         ref={fileInputRef}
         type="file" 
@@ -360,10 +480,10 @@ export default function CutterTool() {
                 Audio Cutter
               </h1>
               <p className="text-lg md:text-xl text-secondary mb-10 font-medium">
-                Free editor to trim and cut any audio file online
+                Free editor to trim, cut, and merge audio files
               </p>
 
-              <button onClick={() => triggerUpload(0)} className="px-8 py-3 rounded-full border border-edge/40 hover:bg-control cursor-pointer transition-colors text-foreground font-semibold text-sm shadow-sm backdrop-blur-sm">
+              <button onClick={triggerUpload} className="px-8 py-3 rounded-full border border-edge/40 hover:bg-control cursor-pointer transition-colors text-foreground font-semibold text-sm shadow-sm backdrop-blur-sm">
                 Browse my files
               </button>
             </div>
@@ -385,7 +505,7 @@ export default function CutterTool() {
               <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
                 <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">3</div>
                 <h3 className="font-bold mb-2">Merge</h3>
-                <p className="text-secondary text-sm">Click [+] between tracks to seamlessly stitch multiple songs together, then Export.</p>
+                <p className="text-secondary text-sm">Tracks stack sequentially. You can reorder them, then Export to stitch them all into one track.</p>
               </div>
             </div>
             <div className="flex justify-center mt-12">
@@ -397,41 +517,67 @@ export default function CutterTool() {
         </div>
       ) : (
         <div className="flex-1 flex flex-col h-full overflow-hidden">
-          {/* Header ONLY visible in timeline mode */}
-          <div className="w-full flex items-center justify-between px-4 py-3 bg-panel border-b border-edge/20 flex-shrink-0 relative z-20">
-            <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-              <Scissors className="w-5 h-5 text-[#38bdf8]" /> Cutter / Splitter
+          {/* Header ONLY visible in timeline mode. Adjusted padding for mobile sidebar hamburger */}
+          <div className="w-full flex items-center justify-between px-4 pl-16 md:pl-4 py-3 bg-panel border-b border-edge/20 flex-shrink-0 relative z-20">
+            <h1 className="text-lg md:text-xl font-bold tracking-tight text-foreground flex items-center gap-2 truncate">
+              <Scissors className="w-5 h-5 text-[#38bdf8] shrink-0" /> <span className="truncate">Cutter / Splitter</span>
             </h1>
-            <div className="flex items-center gap-3">
+          </div>
+          
+          {/* Vertical Timeline Area */}
+          <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar bg-background">
+            <div className="flex flex-col gap-6 max-w-4xl w-full mx-auto px-3 md:px-4 py-6 pb-32">
+              {tracks.map((track, i) => (
+                <WaveformTrack 
+                  key={track.id}
+                  track={track} 
+                  index={i}
+                  totalTracks={tracks.length}
+                  onUpdateTrim={updateTrim}
+                  onRemove={removeTrack}
+                  onMoveUp={moveUp}
+                  onMoveDown={moveDown}
+                  audioCtx={audioCtx!} 
+                />
+              ))}
+              
+              {/* Add Tracks Full-width Dashed Button */}
               <button 
-                onClick={processAndDownload}
-                disabled={isProcessing}
-                className="px-6 py-2 rounded-full bg-[#38bdf8] text-black font-bold text-sm shadow-md hover:bg-[#38bdf8]/90 transition-colors disabled:opacity-50 disabled:pointer-events-none flex items-center gap-2"
+                onClick={triggerUpload}
+                className="w-full mt-2 py-8 rounded-2xl border-2 border-dashed border-[#8b5cf6]/50 text-[#8b5cf6] hover:bg-[#8b5cf6]/10 hover:border-[#8b5cf6] flex flex-col items-center justify-center gap-3 font-bold transition-all group"
               >
-                <Download className="w-4 h-4" />
-                {isProcessing ? 'Processing...' : (tracks.length > 1 ? 'Export Merged' : 'Export Cut')}
+                <div className="w-12 h-12 rounded-full bg-[#8b5cf6]/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Plus className="w-6 h-6" />
+                </div>
+                Add Track
               </button>
             </div>
           </div>
-          
-          {/* Horizontal Timeline Area */}
-          <div className="flex-1 overflow-x-auto overflow-y-hidden flex items-center custom-scrollbar relative px-8 bg-background">
-            <div className="flex items-center gap-4 h-full py-10 min-w-max">
-              <AddButton index={0} />
-              {tracks.map((track, i) => (
-                <React.Fragment key={track.id}>
-                  <WaveformTrack 
-                    track={track} 
-                    index={i}
-                    totalTracks={tracks.length}
-                    onUpdateTrim={updateTrim}
-                    onRemove={removeTrack}
-                    audioCtx={audioCtxRef.current!} 
-                  />
-                  <AddButton index={i + 1} />
-                </React.Fragment>
-              ))}
-            </div>
+
+          {/* Sticky Footer UI mimicking the reference image */}
+          <div className="w-full flex-shrink-0 bg-[#0f172a] border-t border-edge/20 p-4 md:p-6 flex items-center justify-between gap-4 sticky bottom-0 z-50">
+             <div className="flex items-center gap-1 bg-[#1e293b] p-1 rounded-full border border-edge/20 shrink-0">
+               <button 
+                 onClick={() => setFormat('mp3')} 
+                 className={`px-4 py-1.5 rounded-full text-xs md:text-sm font-bold transition-all ${format === 'mp3' ? 'bg-[#10b981] text-black shadow-md' : 'text-secondary hover:text-foreground'}`}
+               >
+                 mp3
+               </button>
+               <button 
+                 onClick={() => setFormat('wav')} 
+                 className={`px-4 py-1.5 rounded-full text-xs md:text-sm font-bold transition-all ${format === 'wav' ? 'bg-[#10b981] text-black shadow-md' : 'text-secondary hover:text-foreground'}`}
+               >
+                 wav
+               </button>
+             </div>
+             
+             <button 
+                onClick={processAndDownload}
+                disabled={isProcessing}
+                className="flex-1 max-w-[300px] py-3 rounded-full bg-slate-200 text-slate-900 font-bold text-sm md:text-lg shadow-lg hover:bg-white transition-colors disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center"
+              >
+                {isProcessing ? 'Processing...' : 'Save'}
+              </button>
           </div>
         </div>
       )}

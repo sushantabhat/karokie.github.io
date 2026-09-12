@@ -129,7 +129,7 @@ function StaticWaveform({ buffer, color, duration, currentTime, totalDuration, o
     };
     window.addEventListener('mouseup', handleGlobalMouseUp);
     return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [onSeekEnd, actualTotalDuration]);
 
   return (
@@ -251,7 +251,7 @@ export default function KaraokeStudio() {
       content: (
         <div className="text-left flex flex-col gap-1">
           <strong className="text-base">2. Hit Record 🔴</strong>
-          <span className="text-sm opacity-90">Tap the red dot to start recording your vocals over the beat. Don't worry about being perfect—you can always redo it!</span>
+          <span className="text-sm opacity-90">Tap the red dot to start recording your vocals over the beat. Don&apos;t worry about being perfect—you can always redo it!</span>
         </div>
       ),
       skipBeacon: true,
@@ -423,7 +423,7 @@ export default function KaraokeStudio() {
     URL.revokeObjectURL(url);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const updateSetting = (key: keyof MixSettings, value: any) => {
     setMixSettings((prev: MixSettings) => ({ ...prev, [key]: value }));
   };
@@ -470,7 +470,7 @@ export default function KaraokeStudio() {
       track('Imported LRC');
       const reader = new FileReader();
       reader.onload = (ev) => {
-        let absIdx = 0;
+        const absIdx = 0;
         const text = ev.target?.result as string;
         let parsed: LineSync[] = [];
         const lines = text.split('\n').map(l => l.trim());
@@ -709,6 +709,7 @@ export default function KaraokeStudio() {
                   setTimeout(() => {
                     stopPreview();
                     if (audioRef.current) audioRef.current.currentTime = 0;
+                    setCurrentTime(0);
                   }, 0);
                 }
               }
@@ -796,11 +797,7 @@ export default function KaraokeStudio() {
     return () => cancelAnimationFrame(animationId);
   }, [isRecording, isRecPaused, getAnalyser]);
 
-  // Reset time when stopping
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (!isRecording && !isPlaying) setCurrentTime(0);
-  }, [isRecording, isPlaying]);
+
 
 
   useEffect(() => {

@@ -29,7 +29,8 @@ export function LyricsSyncTool() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const animationRef = useRef<number | null>(null);
 
-  const duration = audioRef.current?.duration || trackBuffer?.duration || 0;
+    // Directly compute duration from the known trackBuffer without reading the volatile audioRef during render
+  const duration = trackBuffer?.duration || 0;
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -160,12 +161,14 @@ export function LyricsSyncTool() {
     }
   };
 
-  const updateTime = useCallback(() => {
+
+
+  const updateTime = useCallback(function updateTimeFrame() {
     if (audioRef.current) {
       setCurrentTime(audioRef.current.currentTime);
     }
     if (isPlayingLocal) {
-      animationRef.current = requestAnimationFrame(updateTime);
+      animationRef.current = requestAnimationFrame(updateTimeFrame);
     }
   }, [isPlayingLocal]);
 
@@ -183,8 +186,13 @@ export function LyricsSyncTool() {
   const startPlayback = (offset = 0) => {
     if (audioRef.current) {
       audioRef.current.currentTime = offset;
-      audioRef.current.play();
-      setIsPlayingLocal(true);
+      audioRef.current.play().then(() => {
+        setIsPlayingLocal(true);
+      }).catch(err => {
+        console.error("Playback failed", err);
+        setIsPlayingLocal(false);
+        setIsSyncSessionActive(false);
+      });
     }
   };
 
@@ -205,8 +213,13 @@ export function LyricsSyncTool() {
       audioRef.current.pause();
       setIsPlayingLocal(false);
     } else {
-      audioRef.current.play();
-      setIsPlayingLocal(true);
+      audioRef.current.play().then(() => {
+        setIsPlayingLocal(true);
+      }).catch(err => {
+        console.error("Playback failed", err);
+        setIsPlayingLocal(false);
+        setIsSyncSessionActive(false);
+      });
     }
   };
 

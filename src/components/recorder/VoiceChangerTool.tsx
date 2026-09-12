@@ -335,7 +335,7 @@ export default function VoiceChangerTool() {
       const renderedBuffer = await offlineCtx.startRendering();
       cleanups.forEach(c => c());
 
-      const mp3Blob = await audioBufferToMp3(renderedBuffer);
+      const mp3Blob = await await audioBufferToMp3(renderedBuffer);
       const url = URL.createObjectURL(mp3Blob);
       const a = document.createElement('a');
       a.href = url;
