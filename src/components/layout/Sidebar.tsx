@@ -16,10 +16,9 @@ export function Sidebar() {
     { name: "Lyrics Sync", href: "/sync", icon: Music, disabled: false },
     { name: "Voice Changer", href: "/recorder", icon: CircleDot, disabled: false, badge: "" },
     // Adding placeholders for the tools shown in the user's reference image
-    { name: "Splitter", href: "/#", icon: Wand2, disabled: true, badge: "SOON" },
-    { name: "Pitcher", href: "/#", icon: Activity, disabled: true, badge: "SOON" },
-    { name: "Cutter", href: "/#", icon: Scissors, disabled: true, badge: "SOON" },
-    { name: "Joiner", href: "/#", icon: LinkIcon, disabled: true, badge: "SOON" },
+    { name: "Remover", href: "/splitter", icon: Wand2, disabled: false, badge: "" },
+    { name: "Cutter / Splitter", href: "/cutter", icon: Scissors, disabled: false, badge: "" },
+    
   ];
 
   const bottomLinks = [
@@ -117,18 +116,18 @@ export function Sidebar() {
 
       {/* Mobile Fullscreen Overlay */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-50 bg-[#121318] text-white flex flex-col overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+        <div className="md:hidden fixed inset-0 z-50 bg-background text-foreground flex flex-col overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
           
           {/* Overlay Header */}
-          <div className="flex items-center justify-between p-4 border-b border-white/5">
-            <button onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-white/5 rounded-lg transition-colors">
+          <div className="flex items-center justify-between p-4 border-b border-edge/20">
+            <button onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-control rounded-lg transition-colors">
               <Menu className="w-6 h-6" />
             </button>
             <div className="flex items-center gap-4">
-              <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-white/5 rounded-lg transition-colors">
+              <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-control rounded-lg transition-colors">
                 <HelpCircle className="w-6 h-6" />
               </Link>
-              <button onClick={toggleTheme} className="p-2 hover:bg-white/5 rounded-lg transition-colors">
+              <button onClick={toggleTheme} className="p-2 hover:bg-control rounded-lg transition-colors">
                 {theme === 'dark' ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
               </button>
             </div>
@@ -153,14 +152,14 @@ export function Sidebar() {
                   }}
                   className={`relative flex flex-col items-center justify-center aspect-square rounded-xl transition-all
                     ${isActive 
-                      ? "bg-[#181a24] border border-[#6b7280] shadow-[0_0_15px_rgba(255,255,255,0.05)]" 
-                      : "bg-[#181a24]/50 border border-transparent hover:bg-[#181a24]"
+                      ? "bg-panel border border-edge shadow-md" 
+                      : "bg-control/50 border border-transparent hover:bg-control"
                     }
                     ${tool.disabled ? "opacity-50 cursor-not-allowed" : ""}
                   `}
                 >
                   {tool.disabled && (
-                    <div className="absolute top-2 right-2 bg-white/10 text-white/50 text-[9px] px-1.5 py-0.5 rounded font-bold tracking-wider">
+                    <div className="absolute top-2 right-2 bg-foreground/10 text-foreground/50 text-[9px] px-1.5 py-0.5 rounded font-bold tracking-wider">
                       {tool.badge}
                     </div>
                   )}
@@ -177,7 +176,7 @@ export function Sidebar() {
               href="https://discord.gg/PG4ePQWTDh" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors"
+              className="flex items-center gap-2 text-sm text-muted hover:text-foreground transition-colors"
             >
               <MessageCircle className="w-5 h-5" />
               Join our Discord

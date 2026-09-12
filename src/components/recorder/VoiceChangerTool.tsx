@@ -214,10 +214,10 @@ export default function VoiceChangerTool() {
       
       const osc = ctx.createOscillator();
       osc.type = 'sine';
-      osc.frequency.value = 6; // Fast alien wobble
+      osc.frequency.value = 5; // Slightly slower wobble for clarity
       
       const oscGain = ctx.createGain();
-      oscGain.gain.value = 0.006; // Originally 0.015 (which made it gibberish). 0.006 keeps the alien warble but leaves words intact.
+      oscGain.gain.value = 0.004; // Dialed down just a tiny bit more for perfect intelligibility
       
       osc.connect(oscGain);
       oscGain.connect(delay.delayTime);
@@ -360,7 +360,7 @@ export default function VoiceChangerTool() {
           <div className="bg-[#ef4444] text-white p-4 rounded-xl shadow-lg animate-in slide-in-from-top-4 mb-4">
             <div className="flex justify-between items-start">
               <h3 className="font-bold text-lg mb-1">Microphone Blocked 🎤</h3>
-              <button onClick={() => window.location.reload()} className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded text-xs font-bold transition-colors">Reload Page</button>
+              <button onClick={() => window.location.reload()} className="px-3 py-1 bg-black/20 hover:bg-black/30 rounded text-xs font-bold transition-colors">Reload Page</button>
             </div>
             <p className="text-sm whitespace-pre-wrap">{micError}</p>
           </div>
@@ -391,7 +391,7 @@ export default function VoiceChangerTool() {
                   className={`w-32 h-32 rounded-full flex flex-col items-center justify-center gap-2 transition-all duration-300 ${
                     isRecording 
                       ? 'bg-red-500 text-white shadow-[0_0_40px_rgba(239,68,68,0.6)] scale-110' 
-                      : 'bg-control hover:bg-white/10 text-foreground shadow-lg hover:scale-105 border-2 border-transparent hover:border-red-500/50'
+                      : 'bg-control hover:bg-control-hover text-foreground shadow-lg hover:scale-105 border-2 border-transparent hover:border-red-500/50'
                   }`}
                 >
                   {isRecording ? <Square className="w-10 h-10 fill-current" /> : <Mic className="w-10 h-10" />}
@@ -401,7 +401,7 @@ export default function VoiceChangerTool() {
                 {!isRecording && <div className="text-muted text-sm max-w-xs text-center mt-2">Tap the button, say something funny, and tap again when done!</div>}
               </div>
             ) : (
-              <div className="flex flex-col items-center gap-6 w-full max-w-lg bg-black/40 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-xl">
+              <div className="flex flex-col items-center gap-6 w-full max-w-lg bg-panel backdrop-blur-md p-6 rounded-2xl border border-edge/20 shadow-xl">
                 
                 {/* Playback Controls */}
                 <div className="flex items-center gap-4 w-full">
@@ -420,7 +420,7 @@ export default function VoiceChangerTool() {
                     <button
                       onClick={downloadEffect}
                       disabled={isProcessing || isPlaying}
-                      className="w-full py-3 px-4 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full py-3 px-4 bg-control hover:bg-control-hover text-foreground rounded-xl font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Download className="w-4 h-4" />
                       {isProcessing ? "Processing..." : "Download MP3"}
@@ -462,7 +462,7 @@ export default function VoiceChangerTool() {
               className={`flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border transition-all ${
                 activeEffect === effect.id
                   ? 'bg-[#38bdf8]/10 border-[#38bdf8] shadow-[0_0_20px_rgba(56,189,248,0.15)] scale-105'
-                  : 'bg-panel border-edge/20 hover:bg-white/5 hover:border-edge/50 opacity-80 hover:opacity-100'
+                  : 'bg-panel border-edge/20 hover:bg-control-hover hover:border-edge/50 opacity-80 hover:opacity-100'
               }`}
             >
               <div className="text-4xl">{effect.icon}</div>
