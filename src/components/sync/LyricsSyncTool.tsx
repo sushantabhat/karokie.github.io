@@ -322,37 +322,24 @@ export function LyricsSyncTool() {
   // State 1: No Audio Loaded
   if (!trackUrl) {
     return (
-      <div className="h-full w-full flex flex-col items-center justify-center bg-background text-foreground p-6">
-        <div className="text-center max-w-md w-full space-y-8">
-          <div>
-            <Music className="w-16 h-16 mx-auto mb-6 text-foreground opacity-80" />
-            <h1 className="text-3xl font-bold mb-3">Lyrics Sync Tool <span className="sr-only">- LRC File Creator</span></h1>
-            <h2 className="sr-only">Tap to Sync Lyrics to Audio</h2>
-            <p className="text-muted text-lg mb-2">Sync lyrics to any audio track.</p>
-            <p className="text-muted">Export as .lrc for karaoke use.</p>
+      <div className="flex-1 h-full w-full flex flex-col items-center justify-center bg-background font-sans">
+        <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-500 max-w-2xl mx-auto p-4">
+          <div className="flex items-center gap-6 mb-12 text-sm font-bold tracking-widest text-secondary uppercase">
+            <span className="text-foreground border-b-2 border-foreground pb-1">How it works</span>
+            <span className="hover:text-foreground cursor-pointer transition-colors pb-1">Sync Guide</span>
           </div>
 
-          <div className="pt-8 flex flex-col items-center space-y-6">
-            <label className="cursor-pointer group flex flex-col items-center">
-              <input type="file" accept=".mp3,.wav,.m4a,.aac,.ogg,.mp4,.webm,audio/mpeg,audio/wav,audio/aac,audio/ogg,video/mp4,video/webm" className="hidden" onChange={handleTrackUpload} />
-              <div className="border border-edge/40 text-foreground group-hover:border-edge group-hover:bg-panel transition-all rounded-full px-8 py-3 flex items-center gap-2 font-medium">
-                <Upload className="w-5 h-5" />
-                Browse my files
-              </div>
-            </label>
+          <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4 text-foreground">
+            Lyrics Sync Tool
+          </h1>
+          <p className="text-lg md:text-xl text-secondary mb-10 font-medium">
+            Sync lyrics to any audio track and export as .lrc
+          </p>
 
-            <div className="flex items-center w-full max-w-xs gap-4">
-              <div className="flex-1 h-px bg-edge/20"></div>
-              <span className="text-sm text-secondary">or</span>
-              <div className="flex-1 h-px bg-edge/20"></div>
-            </div>
-
-            <label className="cursor-pointer text-sm text-secondary hover:text-foreground transition-colors flex items-center gap-2">
-              <input type="file" accept=".lrc,.srt,.vtt" className="hidden" onChange={handleLRCUpload} />
-              <FileText className="w-4 h-4" />
-              Import an existing .lrc file
-            </label>
-          </div>
+          <label className="px-8 py-3 rounded-full border border-edge/40 hover:bg-control cursor-pointer transition-colors text-foreground font-semibold text-sm shadow-sm backdrop-blur-sm">
+            Browse my files
+            <input type="file" accept=".mp3,.wav,.m4a,.aac,.ogg,.mp4,.webm" className="hidden" onChange={handleTrackUpload} />
+          </label>
         </div>
       </div>
     );
@@ -398,17 +385,7 @@ export function LyricsSyncTool() {
                 Generate Timeline
               </button>
 
-              <div className="flex items-center w-full max-w-xs gap-4 my-2">
-                <div className="flex-1 h-px bg-edge/20"></div>
-                <span className="text-sm text-secondary">or</span>
-                <div className="flex-1 h-px bg-edge/20"></div>
-              </div>
 
-              <label className="cursor-pointer text-sm text-secondary hover:text-foreground transition-colors flex items-center gap-2 border border-edge/20 rounded-full px-6 py-2 bg-panel">
-                <input type="file" accept=".lrc,.srt,.vtt" className="hidden" onChange={handleLRCUpload} />
-                <FileText className="w-4 h-4" />
-                Import .LRC file
-              </label>
             </div>
           </div>
         </div>
