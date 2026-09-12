@@ -48,7 +48,7 @@ export default function VoiceChangerTool() {
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
     return () => {
       if (audioContextRef.current?.state !== 'closed') {
         audioContextRef.current?.close();
@@ -314,7 +314,7 @@ export default function VoiceChangerTool() {
       const ctx = new OfflineAudioContext(2, 44100 * 300, 44100); // 5 minutes max
       const arrayBuffer = await recordedBlob.arrayBuffer();
       // Need a fresh context to decode because Offline context can't decode easily in some browsers
-      const decodeCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const decodeCtx = new (window.AudioContext || window.webkitAudioContext)();
       const audioBuffer = await decodeCtx.decodeAudioData(arrayBuffer);
       
       // Re-create offline buffer length accurately

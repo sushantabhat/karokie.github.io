@@ -39,7 +39,7 @@ export default function AudioEditorTool() {
     const newTracks: Track[] = [];
     
     try {
-      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
