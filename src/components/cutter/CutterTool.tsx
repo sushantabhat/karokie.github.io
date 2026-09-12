@@ -166,16 +166,16 @@ function WaveformTrack({
     const rect = containerRef.current.getBoundingClientRect();
     const drawWidth = rect.width - (handleWidth * 2);
     const x = e.clientX - rect.left - handleWidth;
-    let clickTime = (x / drawWidth) * duration;
-    clickTime = Math.max(0, Math.min(clickTime, duration));
+    const pointerTime = (x / drawWidth) * duration;
+    const clickTime = Math.max(0, Math.min(pointerTime, duration));
 
     const margin = duration * 0.05;
     if (Math.abs(clickTime - trimStart) < margin) {
-      dragOffsetRef.current = clickTime - trimStart;
+      dragOffsetRef.current = pointerTime - trimStart;
       setDragging('start');
       if (isPlaying) stopPlayback();
     } else if (Math.abs(clickTime - trimEnd) < margin) {
-      dragOffsetRef.current = clickTime - trimEnd;
+      dragOffsetRef.current = pointerTime - trimEnd;
       setDragging('end');
       if (isPlaying) stopPlayback();
     } else if (clickTime > trimStart && clickTime < trimEnd) {
