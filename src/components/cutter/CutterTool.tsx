@@ -79,57 +79,63 @@ function WaveformTrack({
     ctx.clearRect(0, 0, width, height);
 
     const data = buffer.getChannelData(0);
-    const step = Math.ceil(data.length / width);
+
     const amp = height / 2;
 
-    const startX = (trimStart / duration) * width;
-    const endX = (trimEnd / duration) * width;
+    const handleWidth = 14;
+    const drawWidth = width - (handleWidth * 2);
+    const startX = handleWidth + (trimStart / duration) * drawWidth;
+    const endX = handleWidth + (trimEnd / duration) * drawWidth;
 
-    for (let i = 0; i < width; i++) {
+    const stepDraw = Math.ceil(data.length / drawWidth);
+
+    for (let i = 0; i < drawWidth; i++) {
       let min = 1.0;
       let max = -1.0;
-      for (let j = 0; j < step; j++) {
-        const datum = data[i * step + j];
+      for (let j = 0; j < stepDraw; j++) {
+        const datum = data[i * stepDraw + j];
         if (datum < min) min = datum;
         if (datum > max) max = datum;
       }
       const y = (1 + min) * amp;
       const h = Math.max(1, (max - min) * amp);
 
+      const drawX = handleWidth + i;
+
       // Distinct styling for trimmed vs active regions
-      if (i >= startX && i <= endX) {
+      if (drawX >= startX && drawX <= endX) {
         ctx.fillStyle = "#10b981"; // Bright Green (Emerald)
       } else {
         ctx.fillStyle = "#334155"; // Muted Slate for trimmed out parts
       }
       
-      ctx.fillRect(i, y, 1, h);
+      ctx.fillRect(drawX, y, 1, h);
     }
 
     // Draw teal brackets for the active trim region
     ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; // Dark overlay
-    ctx.fillRect(0, 0, startX, height);
-    ctx.fillRect(endX, 0, width - endX, height);
+    ctx.fillRect(handleWidth, 0, startX - handleWidth, height);
+    ctx.fillRect(endX, 0, drawWidth - (endX - handleWidth), height);
 
-    // Left Handle (Teal with curved corners)
-    ctx.fillStyle = "#2dd4bf"; // Teal
-    const handleWidth = 12;
+    ctx.fillStyle = "#2dd4bf"; // Teal grabbers
+    
+    // Left Handle (drawn completely OUTSIDE the selected region)
     ctx.beginPath();
-    ctx.roundRect(startX, 0, handleWidth, height, [6, 0, 0, 6]);
+    ctx.roundRect(startX - handleWidth, 0, handleWidth, height, [6, 0, 0, 6]);
     ctx.fill();
 
-    // Right Handle
+    // Right Handle (drawn completely OUTSIDE the selected region)
     ctx.beginPath();
-    ctx.roundRect(endX - handleWidth, 0, handleWidth, height, [0, 6, 6, 0]);
+    ctx.roundRect(endX, 0, handleWidth, height, [0, 6, 6, 0]);
     ctx.fill();
 
     // Inner lines on handles for grab effect
     ctx.fillStyle = "#0f172a";
-    ctx.fillRect(startX + 4, height/2 - 10, 2, 20);
-    ctx.fillRect(startX + 8, height/2 - 10, 2, 20);
+    ctx.fillRect(startX - handleWidth + 4, height/2 - 10, 2, 20);
+    ctx.fillRect(startX - handleWidth + 8, height/2 - 10, 2, 20);
     
-    ctx.fillRect(endX - handleWidth + 4, height/2 - 10, 2, 20);
-    ctx.fillRect(endX - handleWidth + 8, height/2 - 10, 2, 20);
+    ctx.fillRect(endX + 4, height/2 - 10, 2, 20);
+    ctx.fillRect(endX + 8, height/2 - 10, 2, 20);
 
     // Playhead line
     if (isPlaying || currentTime > 0) {
@@ -155,15 +161,20 @@ function WaveformTrack({
 
   const handlePointerDown = (e: React.PointerEvent) => {
     if (!containerRef.current) return;
+    const handleWidth = 14;
     const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const clickTime = (x / rect.width) * duration;
+    const drawWidth = rect.width - (handleWidth * 2);
+    const x = e.clientX - rect.left - handleWidth;
+    let clickTime = (x / drawWidth) * duration;
+    clickTime = Math.max(0, Math.min(clickTime, duration));
 
     const margin = duration * 0.05;
     if (Math.abs(clickTime - trimStart) < margin) {
       setDragging('start');
+      if (isPlaying) stopPlayback();
     } else if (Math.abs(clickTime - trimEnd) < margin) {
       setDragging('end');
+      if (isPlaying) stopPlayback();
     } else if (clickTime > trimStart && clickTime < trimEnd) {
       const localTime = clickTime - trimStart;
       setCurrentTime(localTime);
@@ -174,14 +185,26 @@ function WaveformTrack({
     }
   };
 
+  // Clamp currentTime if bounds shrink past it
+  useEffect(() => {
+    const maxLocalTime = trimEnd - trimStart;
+    if (currentTime > maxLocalTime) {
+      // Clamp the playhead to stay within bounds if the user actively trims the track shorter than the current playhead position.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCurrentTime(maxLocalTime);
+    }
+  }, [trimStart, trimEnd, currentTime]);
+
   useEffect(() => {
     if (!dragging) return;
     
     const handlePointerMove = (e: PointerEvent) => {
       if (!containerRef.current) return;
+      const handleWidth = 14;
       const rect = containerRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      let newTime = (x / rect.width) * duration;
+      const drawWidth = rect.width - (handleWidth * 2);
+      const x = e.clientX - rect.left - handleWidth;
+      let newTime = (x / drawWidth) * duration;
       newTime = Math.max(0, Math.min(newTime, duration));
 
       const minClip = Math.min(0.1, duration * 0.9); // Clamp for very short clips
@@ -321,7 +344,7 @@ function WaveformTrack({
              <RotateCcw className="w-5 h-5 md:w-6 md:h-6" />
            </button>
            <button 
-             onClick={() => isPlaying ? stopPlayback() : startPlayback(0)}
+             onClick={() => isPlaying ? stopPlayback() : startPlayback(currentTime >= trimEnd - trimStart - 0.01 ? 0 : currentTime)}
              aria-label={isPlaying ? "Pause" : "Play"}
              className="w-12 h-12 md:w-14 md:h-14 bg-foreground text-background rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-transform shrink-0"
            >
