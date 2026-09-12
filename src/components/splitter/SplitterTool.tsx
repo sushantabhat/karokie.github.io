@@ -145,8 +145,11 @@ export default function SplitterTool() {
           <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4 text-foreground">
             Vocal Remover
           </h1>
-          <p className="text-lg md:text-xl text-secondary mb-10 font-medium">
+          <p className="text-lg md:text-xl text-secondary mb-4 font-medium">
             Instantly extract an instrumental karaoke track from any song
+          </p>
+          <p className="text-sm text-secondary/80 max-w-lg mx-auto mb-10">
+            Note: Since I can't afford expensive high-end AI APIs (lol), our lightning-fast local processor purposely leaves a faint "ghost pitch" of the original artist in the background. But hey, it actually acts as a perfect guide to help you stay on key while singing!
           </p>
 
           <label className="px-8 py-3 rounded-full border border-edge/40 hover:bg-control cursor-pointer transition-colors text-foreground font-semibold text-sm shadow-sm backdrop-blur-sm">
@@ -255,8 +258,8 @@ export default function SplitterTool() {
               </div>
               <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
                 <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">2</div>
-                <h3 className="font-bold mb-2">AI Processing</h3>
-                <p className="text-secondary text-sm">Our phase-cancellation algorithm instantly isolates center-panned vocals and removes them.</p>
+                <h3 className="font-bold mb-2">Fast Processing</h3>
+                <p className="text-secondary text-sm">Our algorithm mutes center vocals instantly, leaving just enough of the artist's pitch to guide your singing.</p>
               </div>
               <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
                 <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">3</div>
