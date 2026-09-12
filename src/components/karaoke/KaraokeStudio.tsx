@@ -1082,6 +1082,51 @@ export default function KaraokeStudio() {
 
   const hasSyncedLines = lyrics.some(l => l.start !== null);
 
+  if (!trackFile) {
+    return (
+      <div className="flex-1 overflow-y-auto bg-background font-sans scroll-smooth h-full">
+        <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-500 max-w-2xl mx-auto p-4 min-h-[100vh] justify-center">
+          <div className="flex items-center gap-6 mb-12 text-sm font-bold tracking-widest text-secondary uppercase">
+            <button onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })} className="text-secondary hover:text-foreground transition-colors pb-1 flex items-center gap-2">How it works <span>↓</span></button>
+          </div>
+
+          <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4 text-foreground">
+            Karaoke Studio
+          </h1>
+          <p className="text-lg md:text-xl text-secondary mb-10 font-medium">
+            Sing along, record your vocals, and mix them into a professional track
+          </p>
+
+          <label className="px-8 py-3 rounded-full border border-edge/40 hover:bg-control cursor-pointer transition-colors text-foreground font-semibold text-sm shadow-sm backdrop-blur-sm">
+            Browse my files
+            <input type="file" accept=".mp3,.wav,.m4a,.aac,.ogg,.mp4,.webm" className="hidden" onChange={handleTrackUpload} />
+          </label>
+        </div>
+        
+        <div id="how-it-works" className="w-full max-w-4xl mx-auto p-8 bg-panel/30 border-t border-edge/20 rounded-t-3xl min-h-[60vh]">
+          <h2 className="text-3xl font-black mb-12 text-center">How to use Karaoke Studio</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
+              <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">1</div>
+              <h3 className="font-bold mb-2">Upload Track</h3>
+              <p className="text-secondary text-sm">Upload your instrumental backing track or a karaoke video file.</p>
+            </div>
+            <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
+              <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">2</div>
+              <h3 className="font-bold mb-2">Sync Lyrics</h3>
+              <p className="text-secondary text-sm">Upload a .LRC file or paste lyrics to sing along with on-screen prompts.</p>
+            </div>
+            <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
+              <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">3</div>
+              <h3 className="font-bold mb-2">Record & Mix</h3>
+              <p className="text-secondary text-sm">Record your vocals using the studio mixer and download the final mixed track.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Unified Dialog System */}
@@ -1271,24 +1316,6 @@ export default function KaraokeStudio() {
       {/* TIMELINE AREA */}
       <div className={`flex-1 min-h-0 ${activeTab === 'MIXER' ? 'p-3 md:p-8 overflow-y-auto' : 'p-2 md:p-4 lg:p-8 flex flex-col overflow-hidden min-h-0'}`}>
         {activeTab === 'MIXER' ? (
-          !trackFile ? (
-            <div className="flex flex-col items-center justify-center h-full min-h-[60vh] max-w-md mx-auto text-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="w-24 h-24 rounded-full bg-[#38bdf8]/10 flex items-center justify-center mb-4">
-                <Mic2 className="w-12 h-12 text-[#38bdf8]" />
-              </div>
-              <h2 className="text-3xl font-black tracking-tight text-foreground">Ready to sing?</h2>
-              <p className="text-secondary mb-4">Upload an instrumental track or a karaoke video to get started.</p>
-              
-              <button
-                onClick={() => document.getElementById('file-upload')?.click()}
-                className="w-full py-4 bg-[#38bdf8] hover:bg-[#38bdf8]/90 text-black rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-3"
-              >
-                <Upload className="w-5 h-5" />
-                Choose File
-              </button>
-              <p className="text-xs font-medium text-muted mt-2">Supports .mp3, .wav, .mp4, .webm</p>
-            </div>
-          ) : (
           <div className="max-w-6xl mx-auto space-y-6">
             
             {/* VIDEO PLAYER */}
@@ -1721,7 +1748,6 @@ export default function KaraokeStudio() {
             </button>
           </div>
           </div>
-          )
         ) : (
           <div className="flex-1 flex flex-col min-h-0 bg-transparent overflow-hidden gap-3">
             {lyrics.length === 0 ? (

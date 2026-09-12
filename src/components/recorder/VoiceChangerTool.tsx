@@ -351,8 +351,8 @@ export default function VoiceChangerTool() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-background pt-16 px-4 pb-4 md:p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="flex-1 overflow-y-auto bg-background pt-16 px-4 pb-4 md:p-8 scroll-smooth">
+      <div className="max-w-4xl mx-auto space-y-8 min-h-[100vh] flex flex-col justify-center">
         
         {/* Header */}
         
@@ -366,14 +366,17 @@ export default function VoiceChangerTool() {
           </div>
         )}
 
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-black text-foreground flex items-center gap-3">
-              <Sparkles className="w-6 h-6 text-[#38bdf8]" />
-              Voice Changer<span className="sr-only"> & Audio Effects Recorder</span>
-            </h1>
-            <p className="text-secondary mt-1">Record your voice and apply fun effects instantly.</p>
+        <div className="flex flex-col items-center text-center max-w-2xl mx-auto pt-8 pb-12">
+          <div className="flex items-center gap-6 mb-8 text-sm font-bold tracking-widest text-secondary uppercase">
+            <button onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })} className="text-secondary hover:text-foreground transition-colors pb-1 flex items-center gap-2">How it works <span>↓</span></button>
           </div>
+
+          <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4 text-foreground">
+            Voice Changer
+          </h1>
+          <p className="text-lg md:text-xl text-secondary font-medium">
+            Record your voice and apply fun studio effects instantly
+          </p>
         </div>
 
         {/* Main Recorder UI */}
@@ -473,6 +476,26 @@ export default function VoiceChangerTool() {
           ))}
         </div>
 
+        <div id="how-it-works" className="w-full max-w-4xl mx-auto mt-16 p-8 bg-panel/30 border-t border-edge/20 rounded-t-3xl">
+          <h2 className="text-3xl font-black mb-12 text-center">How to use Voice Changer</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
+              <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">1</div>
+              <h3 className="font-bold mb-2">Record</h3>
+              <p className="text-secondary text-sm">Allow microphone access and tap the big record button to capture your voice.</p>
+            </div>
+            <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
+              <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">2</div>
+              <h3 className="font-bold mb-2">Apply Effects</h3>
+              <p className="text-secondary text-sm">Select any character from the grid (Robot, Chipmunk, Alien) to hear it instantly transformed.</p>
+            </div>
+            <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
+              <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">3</div>
+              <h3 className="font-bold mb-2">Download</h3>
+              <p className="text-secondary text-sm">Export your mutated voice as a high-quality MP3 file to share.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

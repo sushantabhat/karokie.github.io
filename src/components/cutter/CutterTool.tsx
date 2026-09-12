@@ -354,26 +354,48 @@ export default function CutterTool() {
         />
 
         {tracks.length === 0 ? (
-          <div className="w-full flex flex-col items-center justify-center h-[70vh]">
-            <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-500 max-w-2xl mx-auto">
-              <div className="flex items-center gap-6 mb-12 text-sm font-bold tracking-widest text-secondary uppercase">
-                <span className="text-foreground border-b-2 border-foreground pb-1">How it works</span>
-                <span className="hover:text-foreground cursor-pointer transition-colors pb-1">Joiner</span>
+          <div className="w-full pb-20">
+            <div className="w-full flex flex-col items-center justify-center min-h-[100vh]">
+              <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-500 max-w-2xl mx-auto">
+                <div className="flex items-center gap-6 mb-12 text-sm font-bold tracking-widest text-secondary uppercase">
+                  <button onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })} className="text-secondary hover:text-foreground transition-colors pb-1 flex items-center gap-2">How it works <span>↓</span></button>
+                </div>
+
+                <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4 text-foreground">
+                  Audio Cutter
+                </h1>
+                <p className="text-lg md:text-xl text-secondary mb-10 font-medium">
+                  Free editor to trim and cut any audio file online
+                </p>
+
+                <button 
+                  onClick={() => triggerUpload(0)}
+                  className="px-8 py-3 rounded-full border border-edge/40 hover:bg-control cursor-pointer transition-colors text-foreground font-semibold text-sm shadow-sm backdrop-blur-sm"
+                >
+                  Browse my files
+                </button>
               </div>
+            </div>
 
-              <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4 text-foreground">
-                Audio Cutter
-              </h1>
-              <p className="text-lg md:text-xl text-secondary mb-10 font-medium">
-                Free editor to trim and cut any audio file online
-              </p>
-
-              <button 
-                onClick={() => triggerUpload(0)}
-                className="px-8 py-3 rounded-full border border-edge/40 hover:bg-control cursor-pointer transition-colors text-foreground font-semibold text-sm shadow-sm backdrop-blur-sm"
-              >
-                Browse my files
-              </button>
+            <div id="how-it-works" className="w-full max-w-4xl mx-auto mt-12 p-8 bg-panel/30 border-t border-edge/20 rounded-t-3xl">
+              <h2 className="text-3xl font-black mb-12 text-center">How to use Audio Cutter</h2>
+              <div className="grid md:grid-cols-3 gap-8">
+                <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
+                  <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">1</div>
+                  <h3 className="font-bold mb-2">Upload Tracks</h3>
+                  <p className="text-secondary text-sm">Add one or multiple audio tracks to the timeline.</p>
+                </div>
+                <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
+                  <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">2</div>
+                  <h3 className="font-bold mb-2">Trim & Cut</h3>
+                  <p className="text-secondary text-sm">Drag the teal handles on the left and right edges of any track to trim exactly what you want.</p>
+                </div>
+                <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
+                  <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">3</div>
+                  <h3 className="font-bold mb-2">Merge</h3>
+                  <p className="text-secondary text-sm">Click [+] between tracks to seamlessly stitch multiple songs together, then Export.</p>
+                </div>
+              </div>
             </div>
           </div>
         ) : (

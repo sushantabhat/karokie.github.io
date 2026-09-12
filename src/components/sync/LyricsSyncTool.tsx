@@ -322,11 +322,10 @@ export function LyricsSyncTool() {
   // State 1: No Audio Loaded
   if (!trackUrl) {
     return (
-      <div className="flex-1 h-full w-full flex flex-col items-center justify-center bg-background font-sans">
-        <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-500 max-w-2xl mx-auto p-4">
+      <div className="flex-1 h-full w-full flex flex-col items-center bg-background font-sans overflow-y-auto scroll-smooth">
+        <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-500 max-w-2xl mx-auto p-4 min-h-[100vh] justify-center">
           <div className="flex items-center gap-6 mb-12 text-sm font-bold tracking-widest text-secondary uppercase">
-            <span className="text-foreground border-b-2 border-foreground pb-1">How it works</span>
-            <span className="hover:text-foreground cursor-pointer transition-colors pb-1">Sync Guide</span>
+            <button onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })} className="text-secondary hover:text-foreground transition-colors pb-1 flex items-center gap-2">How it works <span>↓</span></button>
           </div>
 
           <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4 text-foreground">
@@ -340,6 +339,26 @@ export function LyricsSyncTool() {
             Browse my files
             <input type="file" accept=".mp3,.wav,.m4a,.aac,.ogg,.mp4,.webm" className="hidden" onChange={handleTrackUpload} />
           </label>
+        </div>
+        <div id="how-it-works" className="w-full max-w-4xl mx-auto mt-12 p-8 bg-panel/30 border-t border-edge/20 rounded-t-3xl">
+          <h2 className="text-3xl font-black mb-12 text-center">How to use Lyrics Sync</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
+              <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">1</div>
+              <h3 className="font-bold mb-2">Upload Song</h3>
+              <p className="text-secondary text-sm">Select any audio track, then paste the raw un-synced text of the lyrics into the editor.</p>
+            </div>
+            <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
+              <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">2</div>
+              <h3 className="font-bold mb-2">Tap to Sync</h3>
+              <p className="text-secondary text-sm">Play the audio, and press the Spacebar exactly when the singer sings each line to record the timestamps.</p>
+            </div>
+            <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
+              <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">3</div>
+              <h3 className="font-bold mb-2">Export .LRC</h3>
+              <p className="text-secondary text-sm">Fine-tune any mistakes in the timeline view, then export as a standard .lrc file for Karaoke apps.</p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -392,6 +411,26 @@ export function LyricsSyncTool() {
 
         {/* Hidden Audio Element */}
         {trackUrl && <audio ref={audioRef} src={trackUrl} />}
+        <div id="how-it-works" className="w-full max-w-4xl mx-auto mt-12 p-8 bg-panel/30 border-t border-edge/20 rounded-t-3xl">
+          <h2 className="text-3xl font-black mb-12 text-center">How to use Lyrics Sync</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
+              <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">1</div>
+              <h3 className="font-bold mb-2">Upload Song</h3>
+              <p className="text-secondary text-sm">Select any audio track, then paste the raw un-synced text of the lyrics into the editor.</p>
+            </div>
+            <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
+              <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">2</div>
+              <h3 className="font-bold mb-2">Tap to Sync</h3>
+              <p className="text-secondary text-sm">Play the audio, and press the Spacebar exactly when the singer sings each line to record the timestamps.</p>
+            </div>
+            <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
+              <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">3</div>
+              <h3 className="font-bold mb-2">Export .LRC</h3>
+              <p className="text-secondary text-sm">Fine-tune any mistakes in the timeline view, then export as a standard .lrc file for Karaoke apps.</p>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

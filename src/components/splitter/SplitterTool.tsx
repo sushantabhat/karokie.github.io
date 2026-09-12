@@ -133,13 +133,13 @@ export default function SplitterTool() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-background flex flex-col items-center justify-center min-h-screen relative font-sans text-foreground p-4">
+    <div className="flex-1 overflow-y-auto bg-background relative font-sans text-foreground scroll-smooth">
       
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
       {!file && !isProcessing && (
         <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-500 max-w-2xl mx-auto">
           <div className="flex items-center gap-6 mb-12 text-sm font-bold tracking-widest text-secondary uppercase">
-            <span className="text-foreground border-b-2 border-foreground pb-1">How it works</span>
-            <span className="hover:text-foreground cursor-pointer transition-colors pb-1">Donate</span>
+            <button onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })} className="text-secondary hover:text-foreground transition-colors pb-1 flex items-center gap-2">How it works <span>↓</span></button>
           </div>
 
           <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4 text-foreground">
@@ -240,6 +240,33 @@ export default function SplitterTool() {
         </div>
       )}
 
+
+      </div>
+
+      {!file && !isProcessing && (
+        <div id="how-it-works" className="min-h-[60vh] flex flex-col items-center justify-center p-8 bg-panel/30 border-t border-edge/20">
+          <div className="max-w-3xl mx-auto w-full">
+            <h2 className="text-3xl font-black mb-12 text-center">How to use Vocal Remover</h2>
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
+                <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">1</div>
+                <h3 className="font-bold mb-2">Upload Audio</h3>
+                <p className="text-secondary text-sm">Select any MP3, WAV, or M4A file from your device. We process it entirely locally in your browser.</p>
+              </div>
+              <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
+                <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">2</div>
+                <h3 className="font-bold mb-2">AI Processing</h3>
+                <p className="text-secondary text-sm">Our phase-cancellation algorithm instantly isolates center-panned vocals and removes them.</p>
+              </div>
+              <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
+                <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">3</div>
+                <h3 className="font-bold mb-2">Download</h3>
+                <p className="text-secondary text-sm">Listen to the preview and download your new instrumental karaoke track instantly.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
