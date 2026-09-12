@@ -158,6 +158,7 @@ function WaveformTrack({
 
   // Dragging Logic
   const [dragging, setDragging] = useState<'start' | 'end' | 'playhead' | null>(null);
+  const dragOffsetRef = useRef<number>(0);
 
   const handlePointerDown = (e: React.PointerEvent) => {
     if (!containerRef.current) return;
@@ -170,9 +171,11 @@ function WaveformTrack({
 
     const margin = duration * 0.05;
     if (Math.abs(clickTime - trimStart) < margin) {
+      dragOffsetRef.current = clickTime - trimStart;
       setDragging('start');
       if (isPlaying) stopPlayback();
     } else if (Math.abs(clickTime - trimEnd) < margin) {
+      dragOffsetRef.current = clickTime - trimEnd;
       setDragging('end');
       if (isPlaying) stopPlayback();
     } else if (clickTime > trimStart && clickTime < trimEnd) {
@@ -204,7 +207,8 @@ function WaveformTrack({
       const rect = containerRef.current.getBoundingClientRect();
       const drawWidth = rect.width - (handleWidth * 2);
       const x = e.clientX - rect.left - handleWidth;
-      let newTime = (x / drawWidth) * duration;
+      const rawTime = (x / drawWidth) * duration;
+      let newTime = rawTime - dragOffsetRef.current;
       newTime = Math.max(0, Math.min(newTime, duration));
 
       const minClip = Math.min(0.1, duration * 0.9); // Clamp for very short clips
@@ -218,6 +222,7 @@ function WaveformTrack({
 
     const handlePointerUp = () => {
       setDragging(null);
+      dragOffsetRef.current = 0;
     };
 
     window.addEventListener('pointermove', handlePointerMove);
