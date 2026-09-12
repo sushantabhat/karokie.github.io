@@ -336,132 +336,105 @@ export default function CutterTool() {
   );
 
   return (
-    <div className="flex-1 overflow-hidden bg-background h-screen pt-16 flex flex-col font-sans text-foreground">
+    <div className="flex-1 w-full h-full bg-background flex flex-col font-sans text-foreground relative">
       
-      
+      {/* Hidden file input used by all + buttons */}
+      <input 
+        ref={fileInputRef}
+        type="file" 
+        accept="audio/*" 
+        multiple 
+        className="hidden" 
+        onChange={handleUpload} 
+      />
 
-      {/* Horizontal Timeline Area */}
-      <div className="flex-1 overflow-x-auto overflow-y-hidden flex items-center custom-scrollbar relative px-8 py-10 bg-background">
-        
-        {/* Hidden file input used by all + buttons */}
-        <input 
-          ref={fileInputRef}
-          type="file" 
-          accept="audio/*" 
-          multiple 
-          className="hidden" 
-          onChange={handleUpload} 
-        />
-
-        {tracks.length === 0 ? (
-          <div className="w-full pb-20">
-            <div className="w-full flex flex-col items-center justify-center min-h-[100vh]">
-              <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-500 max-w-2xl mx-auto">
-                <div className="flex items-center gap-6 mb-12 text-sm font-bold tracking-widest text-secondary uppercase">
-                  <button onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })} className="text-secondary hover:text-foreground transition-colors pb-1 flex items-center gap-2">How it works <span>↓</span></button>
-                </div>
-
-                <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4 text-foreground">
-                  Audio Cutter
-                </h1>
-                <p className="text-lg md:text-xl text-secondary mb-10 font-medium">
-                  Free editor to trim and cut any audio file online
-                </p>
-
-                <button 
-                  onClick={() => triggerUpload(0)}
-                  className="px-8 py-3 rounded-full border border-edge/40 hover:bg-control cursor-pointer transition-colors text-foreground font-semibold text-sm shadow-sm backdrop-blur-sm"
-                >
-                  Browse my files
-                </button>
+      {tracks.length === 0 ? (
+        <div id="top" className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar w-full h-full relative z-10">
+          <div className="w-full flex flex-col items-center justify-center min-h-[100dvh] pt-16">
+            <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-500 max-w-2xl mx-auto p-4">
+              <div className="flex items-center gap-6 mb-12 text-sm font-bold tracking-widest text-secondary uppercase">
+                <button onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })} className="text-secondary hover:text-foreground transition-colors pb-1 flex items-center gap-2">How it works <span>↓</span></button>
               </div>
-            </div>
 
-            <div id="how-it-works" className="w-full max-w-4xl mx-auto mt-12 p-8 bg-panel/30 border-t border-edge/20 rounded-t-3xl">
-              <h2 className="text-3xl font-black mb-12 text-center">How to use Audio Cutter</h2>
-              <div className="grid md:grid-cols-3 gap-8">
-                <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
-                  <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">1</div>
-                  <h3 className="font-bold mb-2">Upload Tracks</h3>
-                  <p className="text-secondary text-sm">Add one or multiple audio tracks to the timeline.</p>
-                </div>
-                <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
-                  <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">2</div>
-                  <h3 className="font-bold mb-2">Trim & Cut</h3>
-                  <p className="text-secondary text-sm">Drag the teal handles on the left and right edges of any track to trim exactly what you want.</p>
-                </div>
-                <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
-                  <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">3</div>
-                  <h3 className="font-bold mb-2">Merge</h3>
-                  <p className="text-secondary text-sm">Click [+] between tracks to seamlessly stitch multiple songs together, then Export.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center gap-4 h-full py-10">
-            {/* Very First Add Button */}
-            <AddButton index={0} />
-            
-            {tracks.map((track, i) => (
-              <React.Fragment key={track.id}>
-                {/* The Waveform Track */}
-                <WaveformTrack 
-                  track={track} 
-                  index={i}
-                  totalTracks={tracks.length}
-                  onUpdateTrim={updateTrim}
-                  onRemove={removeTrack}
-                  audioCtx={audioCtxRef.current!} 
-                />
-                
-                {/* Add Button AFTER this track */}
-                <AddButton index={i + 1} />
-              </React.Fragment>
-            ))}
-          </div>
-        )}
-      </div>
+              <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4 text-foreground">
+                Audio Cutter
+              </h1>
+              <p className="text-lg md:text-xl text-secondary mb-10 font-medium">
+                Free editor to trim and cut any audio file online
+              </p>
 
-      {/* Bottom Floating Bar */}
-      {tracks.length > 0 && (
-        <div className="bg-panel border-t border-edge/20 p-4 px-8 flex items-center justify-between shadow-[0_-10px_30px_rgba(0,0,0,0.5)] z-20">
-          <div className="flex flex-col">
-            <span className="text-xs text-secondary font-bold uppercase tracking-wider mb-0.5">Total Timeline</span>
-            <span className="text-foreground font-mono text-sm">
-              {tracks.length} {tracks.length === 1 ? 'track' : 'tracks'}
-            </span>
+              <button onClick={() => triggerUpload(0)} className="px-8 py-3 rounded-full border border-edge/40 hover:bg-control cursor-pointer transition-colors text-foreground font-semibold text-sm shadow-sm backdrop-blur-sm">
+                Browse my files
+              </button>
+            </div>
           </div>
           
-          <button 
-            onClick={processAndDownload}
-            disabled={isProcessing}
-            className="px-10 py-4 bg-[#38bdf8] hover:bg-[#0ea5e9] text-black font-black rounded-full transition-all shadow-lg shadow-sky-900/50 flex items-center gap-2 text-lg"
-          >
-            <Download className="w-6 h-6" />
-            {isProcessing ? "Processing..." : (tracks.length > 1 ? "Merge & Download" : "Download Cut")}
-          </button>
+          <div id="how-it-works" className="w-full max-w-4xl mx-auto p-8 bg-panel/30 border-t border-edge/20 rounded-t-3xl min-h-[60vh]">
+            <h2 className="text-3xl font-black mb-12 text-center">How to use Audio Cutter</h2>
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
+                <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">1</div>
+                <h3 className="font-bold mb-2">Upload Tracks</h3>
+                <p className="text-secondary text-sm">Add one or multiple audio tracks to the timeline.</p>
+              </div>
+              <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
+                <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">2</div>
+                <h3 className="font-bold mb-2">Trim & Cut</h3>
+                <p className="text-secondary text-sm">Drag the teal handles on the left and right edges of any track to trim exactly what you want.</p>
+              </div>
+              <div className="flex flex-col items-center text-center p-6 bg-panel rounded-2xl border border-edge/20 shadow-sm">
+                <div className="w-12 h-12 bg-[#38bdf8]/10 text-[#38bdf8] rounded-full flex items-center justify-center font-bold text-xl mb-4">3</div>
+                <h3 className="font-bold mb-2">Merge</h3>
+                <p className="text-secondary text-sm">Click [+] between tracks to seamlessly stitch multiple songs together, then Export.</p>
+              </div>
+            </div>
+            <div className="flex justify-center mt-12">
+              <button onClick={() => document.getElementById("top")?.scrollIntoView({ behavior: "smooth" })} className="px-6 py-2 rounded-full bg-edge/20 hover:bg-edge/40 text-foreground text-sm font-bold transition-all flex items-center gap-2">
+                ↑ Back to top
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="flex-1 flex flex-col h-full overflow-hidden">
+          {/* Header ONLY visible in timeline mode */}
+          <div className="w-full flex items-center justify-between px-4 py-3 bg-panel border-b border-edge/20 flex-shrink-0 relative z-20">
+            <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+              <Scissors className="w-5 h-5 text-[#38bdf8]" /> Cutter / Splitter
+            </h1>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={processAndDownload}
+                disabled={isProcessing}
+                className="px-6 py-2 rounded-full bg-[#38bdf8] text-black font-bold text-sm shadow-md hover:bg-[#38bdf8]/90 transition-colors disabled:opacity-50 disabled:pointer-events-none flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                {isProcessing ? 'Processing...' : (tracks.length > 1 ? 'Export Merged' : 'Export Cut')}
+              </button>
+            </div>
+          </div>
+          
+          {/* Horizontal Timeline Area */}
+          <div className="flex-1 overflow-x-auto overflow-y-hidden flex items-center custom-scrollbar relative px-8 bg-background">
+            <div className="flex items-center gap-4 h-full py-10 min-w-max">
+              <AddButton index={0} />
+              {tracks.map((track, i) => (
+                <React.Fragment key={track.id}>
+                  <WaveformTrack 
+                    track={track} 
+                    index={i}
+                    totalTracks={tracks.length}
+                    onUpdateTrim={updateTrim}
+                    onRemove={removeTrack}
+                    audioCtx={audioCtxRef.current!} 
+                  />
+                  <AddButton index={i + 1} />
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
         </div>
       )}
-
-      {/* Custom Scrollbar Styles embedded */}
-      <style dangerouslySetInnerHTML={{__html: `
-        .custom-scrollbar::-webkit-scrollbar {
-          height: 12px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #1f2335;
-          border-radius: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #38bdf8;
-          border-radius: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #0ea5e9;
-        }
-      `}} />
-
     </div>
   );
 }

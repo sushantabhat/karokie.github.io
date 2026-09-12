@@ -133,7 +133,7 @@ export default function SplitterTool() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-background relative font-sans text-foreground scroll-smooth">
+    <div id="top" className="flex-1 overflow-y-auto bg-background relative font-sans text-foreground scroll-smooth">
       
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
       {!file && !isProcessing && (
@@ -264,7 +264,13 @@ export default function SplitterTool() {
                 <p className="text-secondary text-sm">Listen to the preview and download your new instrumental karaoke track instantly.</p>
               </div>
             </div>
+
+          <div className="flex justify-center mt-12">
+            <button onClick={() => document.getElementById("top")?.scrollIntoView({ behavior: "smooth" })} className="px-6 py-2 rounded-full bg-edge/20 hover:bg-edge/40 text-foreground text-sm font-bold transition-all flex items-center gap-2">
+              ↑ Back to top
+            </button>
           </div>
+        </div>
         </div>
       )}
     </div>

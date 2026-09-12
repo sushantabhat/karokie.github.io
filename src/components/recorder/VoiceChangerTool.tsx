@@ -351,8 +351,8 @@ export default function VoiceChangerTool() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-background pt-16 px-4 pb-4 md:p-8 scroll-smooth">
-      <div className="max-w-4xl mx-auto space-y-8 min-h-[100vh] flex flex-col justify-center">
+    <div id="top" className="flex-1 overflow-y-auto bg-background pt-16 px-4 pb-4 md:p-8 scroll-smooth">
+      <div className="max-w-4xl mx-auto space-y-8 min-h-screen flex flex-col justify-center">
         
         {/* Header */}
         
@@ -494,6 +494,12 @@ export default function VoiceChangerTool() {
               <h3 className="font-bold mb-2">Download</h3>
               <p className="text-secondary text-sm">Export your mutated voice as a high-quality MP3 file to share.</p>
             </div>
+          </div>
+
+          <div className="flex justify-center mt-12">
+            <button onClick={() => document.getElementById("top")?.scrollIntoView({ behavior: "smooth" })} className="px-6 py-2 rounded-full bg-edge/20 hover:bg-edge/40 text-foreground text-sm font-bold transition-all flex items-center gap-2">
+              ↑ Back to top
+            </button>
           </div>
         </div>
       </div>

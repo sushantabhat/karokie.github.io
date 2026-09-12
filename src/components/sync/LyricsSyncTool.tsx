@@ -323,7 +323,7 @@ export function LyricsSyncTool() {
   if (!trackUrl) {
     return (
       <div className="flex-1 h-full w-full flex flex-col items-center bg-background font-sans overflow-y-auto scroll-smooth">
-        <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-500 max-w-2xl mx-auto p-4 min-h-[100vh] justify-center">
+        <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-500 max-w-2xl mx-auto p-4 min-h-screen justify-center">
           <div className="flex items-center gap-6 mb-12 text-sm font-bold tracking-widest text-secondary uppercase">
             <button onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })} className="text-secondary hover:text-foreground transition-colors pb-1 flex items-center gap-2">How it works <span>↓</span></button>
           </div>
@@ -358,6 +358,12 @@ export function LyricsSyncTool() {
               <h3 className="font-bold mb-2">Export .LRC</h3>
               <p className="text-secondary text-sm">Fine-tune any mistakes in the timeline view, then export as a standard .lrc file for Karaoke apps.</p>
             </div>
+
+          </div>
+          <div className="flex justify-center mt-12">
+            <button onClick={() => document.getElementById("top")?.scrollIntoView({ behavior: "smooth" })} className="px-6 py-2 rounded-full bg-edge/20 hover:bg-edge/40 text-foreground text-sm font-bold transition-all flex items-center gap-2">
+              ↑ Back to top
+            </button>
           </div>
         </div>
       </div>
@@ -429,6 +435,12 @@ export function LyricsSyncTool() {
               <h3 className="font-bold mb-2">Export .LRC</h3>
               <p className="text-secondary text-sm">Fine-tune any mistakes in the timeline view, then export as a standard .lrc file for Karaoke apps.</p>
             </div>
+
+          </div>
+          <div className="flex justify-center mt-12">
+            <button onClick={() => document.getElementById("top")?.scrollIntoView({ behavior: "smooth" })} className="px-6 py-2 rounded-full bg-edge/20 hover:bg-edge/40 text-foreground text-sm font-bold transition-all flex items-center gap-2">
+              ↑ Back to top
+            </button>
           </div>
         </div>
       </div>
