@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Mic2, Music, CircleDot, HelpCircle, Menu, X, MessageCircle, Moon, Sun, Scissors, Link as LinkIcon, Wand2, Activity } from "lucide-react";
+import { Mic2, Music, CircleDot, HelpCircle, Menu, X, MessageCircle, Moon, Sun, Scissors, Link as LinkIcon, Wand2 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 
 export function Sidebar() {

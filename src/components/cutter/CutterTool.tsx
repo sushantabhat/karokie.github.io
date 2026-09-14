@@ -137,28 +137,27 @@ function WaveformTrack({
     ctx.fillRect(endX + 4, height/2 - 10, 2, 20);
     ctx.fillRect(endX + 8, height/2 - 10, 2, 20);
 
-    // Playhead line
-    if (isPlaying || currentTime > 0) {
-      const playheadX = startX + ((currentTime / (trimEnd - trimStart)) * (endX - startX));
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(Math.min(playheadX, endX - 2), 0, 2, height);
-      
-      // Floating time bubble above playhead
-      ctx.fillStyle = "rgba(30, 41, 59, 0.9)";
-      ctx.beginPath();
-      ctx.roundRect(playheadX - 24, 4, 48, 20, 10);
-      ctx.fill();
-      ctx.fillStyle = "#fff";
-      ctx.font = "10px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText(formatTime(trimStart + currentTime), playheadX, 18);
-    }
+    // Playhead line (always visible so it doesn't disappear when pushed to 0)
+    const playheadX = startX + ((currentTime / (trimEnd - trimStart)) * (endX - startX));
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(Math.min(playheadX, endX - 2), 0, 2, height);
+    
+    // Floating time bubble above playhead
+    ctx.fillStyle = "rgba(30, 41, 59, 0.9)";
+    ctx.beginPath();
+    ctx.roundRect(playheadX - 24, 4, 48, 20, 10);
+    ctx.fill();
+    ctx.fillStyle = "#fff";
+    ctx.font = "10px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(formatTime(trimStart + currentTime), playheadX, 18);
 
   }, [buffer, trimStart, trimEnd, currentTime, isPlaying, duration]);
 
   // Dragging Logic
   const [dragging, setDragging] = useState<'start' | 'end' | 'playhead' | null>(null);
   const dragOffsetRef = useRef<number>(0);
+  const absolutePlayheadRef = useRef<number>(0);
 
   const handlePointerDown = (e: React.PointerEvent) => {
     if (!containerRef.current) return;
@@ -169,16 +168,26 @@ function WaveformTrack({
     const pointerTime = (x / drawWidth) * duration;
     const clickTime = Math.max(0, Math.min(pointerTime, duration));
 
-    const margin = duration * 0.05;
-    if (Math.abs(clickTime - trimStart) < margin) {
+    absolutePlayheadRef.current = trimStart + currentTime;
+
+    // Convert pixel dimensions to time to create perfectly accurate physical hit boxes
+    const handleTime = (handleWidth / drawWidth) * duration;
+    const paddingTime = (10 / drawWidth) * duration; // 10px slop for easy touch targeting on mobile
+
+    // Left handle physically sits from [trimStart - handleTime] to [trimStart]
+    if (pointerTime >= trimStart - handleTime - paddingTime && pointerTime <= trimStart + paddingTime) {
       dragOffsetRef.current = pointerTime - trimStart;
       setDragging('start');
       if (isPlaying) stopPlayback();
-    } else if (Math.abs(clickTime - trimEnd) < margin) {
+    } 
+    // Right handle physically sits from [trimEnd] to [trimEnd + handleTime]
+    else if (pointerTime >= trimEnd - paddingTime && pointerTime <= trimEnd + handleTime + paddingTime) {
       dragOffsetRef.current = pointerTime - trimEnd;
       setDragging('end');
       if (isPlaying) stopPlayback();
-    } else if (clickTime > trimStart && clickTime < trimEnd) {
+    } 
+    // Otherwise, if they clicked inside the waveform, move the playhead
+    else if (clickTime > trimStart && clickTime < trimEnd) {
       const localTime = clickTime - trimStart;
       setCurrentTime(localTime);
       if (isPlaying) {
@@ -188,15 +197,7 @@ function WaveformTrack({
     }
   };
 
-  // Clamp currentTime if bounds shrink past it
-  useEffect(() => {
-    const maxLocalTime = trimEnd - trimStart;
-    if (currentTime > maxLocalTime) {
-      // Clamp the playhead to stay within bounds if the user actively trims the track shorter than the current playhead position.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCurrentTime(maxLocalTime);
-    }
-  }, [trimStart, trimEnd, currentTime]);
+
 
   useEffect(() => {
     if (!dragging) return;
@@ -214,9 +215,15 @@ function WaveformTrack({
       const minClip = Math.min(0.1, duration * 0.9); // Clamp for very short clips
 
       if (dragging === 'start') {
-        onUpdateTrim(track.id, Math.min(newTime, trimEnd - minClip), trimEnd);
+        const newTrimStart = Math.min(newTime, trimEnd - minClip);
+        const newRelativeTime = absolutePlayheadRef.current - newTrimStart;
+        setCurrentTime(Math.max(0, Math.min(newRelativeTime, trimEnd - newTrimStart)));
+        onUpdateTrim(track.id, newTrimStart, trimEnd);
       } else if (dragging === 'end') {
-        onUpdateTrim(track.id, trimStart, Math.max(newTime, trimStart + minClip));
+        const newTrimEnd = Math.max(newTime, trimStart + minClip);
+        const newRelativeTime = absolutePlayheadRef.current - trimStart;
+        setCurrentTime(Math.max(0, Math.min(newRelativeTime, newTrimEnd - trimStart)));
+        onUpdateTrim(track.id, trimStart, newTrimEnd);
       }
     };
 
@@ -288,7 +295,26 @@ function WaveformTrack({
     return () => stopPlayback();
   }, [stopPlayback]);
 
+  const handlePointerHover = (e: React.PointerEvent) => {
+    if (dragging) return;
+    if (!containerRef.current) return;
+    const handleWidth = 14;
+    const rect = containerRef.current.getBoundingClientRect();
+    const drawWidth = rect.width - (handleWidth * 2);
+    const x = e.clientX - rect.left - handleWidth;
+    const pointerTime = (x / drawWidth) * duration;
+    
+    const handleTime = (handleWidth / drawWidth) * duration;
+    const paddingTime = (10 / drawWidth) * duration;
 
+    let cursor = 'crosshair';
+    if (pointerTime >= trimStart - handleTime - paddingTime && pointerTime <= trimStart + paddingTime) {
+      cursor = 'col-resize';
+    } else if (pointerTime >= trimEnd - paddingTime && pointerTime <= trimEnd + handleTime + paddingTime) {
+      cursor = 'col-resize';
+    }
+    containerRef.current.style.cursor = cursor;
+  };
 
   return (
     <div className="w-full bg-[#1e293b] rounded-2xl border border-edge/20 p-4 md:p-5 flex flex-col gap-4 shadow-sm relative overflow-hidden">
@@ -316,10 +342,15 @@ function WaveformTrack({
       {/* Waveform Row */}
       <div 
         ref={containerRef}
-        className="relative w-full rounded-lg bg-black/40 overflow-hidden cursor-crosshair border border-black/20"
+        className="relative w-full rounded-lg bg-black/40 overflow-hidden border border-black/20"
+        style={{ cursor: 'crosshair' }}
         onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerHover}
+        onPointerLeave={() => {
+          if (containerRef.current) containerRef.current.style.cursor = 'crosshair';
+        }}
       >
-        <canvas ref={canvasRef} className="block w-full touch-none" />
+        <canvas ref={canvasRef} className="block w-full touch-pan-y" />
       </div>
       
       {/* Controls Row */}
