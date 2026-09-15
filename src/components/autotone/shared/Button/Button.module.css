@@ -1,0 +1,42 @@
+.button {
+  background-color: darkslategray;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.button.secondary {
+  background-color: transparent;
+  border: 2px solid darkslategray;
+}
+
+.button:hover {
+  opacity: 0.5;
+}
+
+.disabled {
+  user-select: none;
+  cursor: default;
+  opacity: 0.5;
+}
+
+.large {
+  height: 50px;
+  width: 50px;
+}
+
+.small {
+  height: 40px;
+  width: 40px;
+}
+
+.icon {
+  color: white;
+  display: flex;
+}
+
+.secondary .icon {
+  color: darkslategray;
+}

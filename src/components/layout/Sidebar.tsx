@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Mic2, Music, CircleDot, HelpCircle, Menu, X, MessageCircle, Moon, Sun, Scissors, Link as LinkIcon, Wand2 } from "lucide-react";
+import { Mic2, Music, CircleDot, HelpCircle, Menu, X, MessageCircle, Moon, Sun, Scissors, Link as LinkIcon, Wand2, Activity } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 
 export function Sidebar() {
@@ -18,6 +18,7 @@ export function Sidebar() {
     // Adding placeholders for the tools shown in the user's reference image
     { name: "Remover", href: "/splitter", icon: Wand2, disabled: false, badge: "" },
     { name: "Cutter / Splitter", href: "/cutter", icon: Scissors, disabled: false, badge: "" },
+    { name: "Autotune", href: "/autotune", icon: Activity, disabled: false, badge: "" },
     
   ];
 

@@ -1,0 +1,16 @@
+.text {
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: darkslategray;
+}
+
+.center {
+  text-align: center;
+}
+
+@media (max-width: 450px) {
+  .text {
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+}
