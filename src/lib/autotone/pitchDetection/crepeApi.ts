@@ -38,7 +38,13 @@ const detectPitch = (buffer) => {
     const frame = tf.tensor(resampled.slice(0, 1024));
     const zeromean = tf.sub(frame, tf.mean(frame));
     const framestd = tf.tensor(tf.norm(zeromean).dataSync()/Math.sqrt(1024));
-    const normalized = tf.div(zeromean, framestd);
+    const framestdVal = framestd.dataSync()[0];
+    if (framestdVal < 1e-8) { 
+      freq = 0;
+      confidence = 0;
+      return { freq: 0, confidence: 0 }; 
+    }
+  const normalized = tf.div(zeromean, framestd);
     const input = normalized.reshape([1, 1024]);
     const activation = _model.predict([input]).reshape([360]);
 

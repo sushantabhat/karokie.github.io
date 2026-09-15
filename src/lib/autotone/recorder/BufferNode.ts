@@ -15,11 +15,31 @@ export class BufferNode extends AudioWorkletNode {
 
   reset() {
     this._buffers = [];
+    this._finalizeResolve = null;
+    this._finalCount = 0;
     this.port.postMessage({ type: 'reset' });
   }
 
   onMessage(message) {
-    this._buffers.push(message.data);
+    if (message.data && message.data.type === 'finalizeAck') {
+      this._finalCount = message.data.count;
+      if (message.data.count > 0 && message.data.buffer) {
+        this._buffers.push(message.data.buffer);
+      }
+      if (this._finalizeResolve) {
+        this._finalizeResolve();
+        this._finalizeResolve = null;
+      }
+    } else {
+      this._buffers.push(message.data);
+    }
+  }
+
+  async finalize() {
+    return new Promise((resolve) => {
+      this._finalizeResolve = resolve;
+      this.port.postMessage({ type: 'finalize' });
+    });
   }
 
   getAudioData() {
@@ -27,12 +47,22 @@ export class BufferNode extends AudioWorkletNode {
       return null;
     }
     const hopSize = this._bufferSize / this._osamp;
-    const audioSize = this._bufferSize + ((this._buffers.length - 1) * hopSize);
+    let audioSize = 0;
+    if (this._buffers.length === 1) {
+      audioSize = this._finalCount > 0 ? this._finalCount : this._bufferSize;
+    } else {
+      const baseSize = this._bufferSize + ((this._buffers.length - 2) * hopSize);
+      const overlap = this._bufferSize - hopSize;
+      const finalValid = this._finalCount > 0 ? Math.max(0, this._finalCount - overlap) : hopSize;
+      audioSize = baseSize + finalValid;
+    }
     const audio = new Float32Array(audioSize);
-    audio.set(this._buffers[0]);
+    audio.set(this._buffers[0].subarray(0, Math.min(this._buffers[0].length, audioSize)));
     for (let i = 1; i < this._buffers.length; i++) {
       const offset = this._bufferSize + (i - 1) * hopSize;
-      for (let j = 0; j < hopSize; j++) {
+      const remaining = audioSize - offset;
+      if (remaining <= 0) break;
+      for (let j = 0; j < Math.min(hopSize, remaining); j++) {
         audio[offset + j] = this._buffers[i][this._bufferSize - hopSize + j];
       }
     }

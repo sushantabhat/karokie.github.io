@@ -25,7 +25,7 @@ export const SCALE_TYPES = [
 ];
 
 const getNoteFrequency = (note, octave) => {
-  return 440 * Math.pow(2, (NOTES.indexOf(note) + (octave - 4) * 12) / 12);
+  return 440 * Math.pow(2, (NOTES.indexOf(note) - NOTES.indexOf('A') + (octave - 4) * 12) / 12);
 };
 
 export const getScaleFreqs = (

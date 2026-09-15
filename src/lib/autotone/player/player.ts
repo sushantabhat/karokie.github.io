@@ -1,4 +1,5 @@
 // @ts-nocheck
+let currentOnEnded = null;
 let audioContext;
 let currentSource = null;
 
@@ -29,9 +30,10 @@ export const play = async (data, sampleRate, onEnded) => {
   if (onEnded) {
     audioSource.onended = () => {
       if (currentSource === audioSource) {
+        if (currentOnEnded) currentOnEnded();
+        currentOnEnded = null;
         currentSource = null;
       }
-      if (currentSource === audioSource) onEnded();
     };
   }
 

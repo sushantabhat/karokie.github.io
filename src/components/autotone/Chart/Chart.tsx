@@ -17,7 +17,13 @@ export const Chart = ({  freqs, confidences, color, progress = 0  }: any) => {
       if (dims.width !== clientWidth || dims.height !== clientHeight) {
         setDims({ width: clientWidth, height: clientHeight });
       }
-      draw(freqs, confidences, color, ref.current.getContext('2d'), progress);
+      const context = ref.current.getContext('2d');
+      if (!context) return;
+      if (freqs && freqs.length > 0 && confidences && confidences.length > 0) {
+        draw(freqs, confidences, color, context, progress);
+      } else {
+        context.clearRect(0, 0, clientWidth, clientHeight);
+      }
     }
   };
 
@@ -79,7 +85,7 @@ const normalize = (values: any) => {
     max = Math.max(max, values[i]);
   }
   return Array.from(values).map((value) => {
-    return (value - min) / (max - min);
+    return max === min ? value : (value - min) / (max - min);
   });
 };
 
@@ -93,9 +99,16 @@ const freqsToCoords = (freqs, confidences, width, height: any) => {
       yMax = Math.max(yMax, freqs[i]);
     }
   }
+  if (yMin === Infinity) {
+    for (let i = 0; i < freqs.length; i++) {
+      yMin = Math.min(yMin, freqs[i]);
+      yMax = Math.max(yMax, freqs[i]);
+    }
+    if (yMin === Infinity) { yMin = 0; yMax = 0; }
+  }
   if (yMax === yMin) { yMax = yMin + 1; }
   return Array.from(freqs).map((freq, index) => {
-    const x = index / (freqs.length - 1) * width;
+    const x = freqs.length <= 1 ? 0 : index / (freqs.length - 1) * width;
     let y = (1 - (freq - yMin) / (yMax - yMin)) * height;
     y = Math.max(y, 0);
     y = Math.min(y, height);

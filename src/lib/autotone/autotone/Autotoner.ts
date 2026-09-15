@@ -25,6 +25,8 @@ export class Autotoner {
     this._tunerWindowSize = DEFAULT_TUNER_WINDOW_SIZE;
     this._tunerOsamp = DEFAULT_TUNER_OSAMP;
     this._crepeOsamp = DEFAULT_CREPE_OSAMP;
+    this._queue = Promise.resolve();
+    this._version = 0;
   }
 
   async init() {
@@ -39,14 +41,15 @@ export class Autotoner {
   record() {
     this._originalFreqs = null;
     this._autotonedFreqs = null;
+    this._version++;
     this._autotonedAudio = null;
     this._confidences = null;
     recorder.record();
   }
 
   async stopRecording() {
-    recorder.stop();
-    this._recordingData = this._recordingData;
+    await recorder.stop();
+    this._recordingData = recorder.getData();
     await this.autotone();
   }
 
@@ -97,17 +100,24 @@ export class Autotoner {
     if (!this._recordingData) {
       return;
     }
+    this._version++;
+    const currentVersion = this._version;
+    this._queue = this._queue.then(async () => {
+      if (this._version !== currentVersion) return;
     if (!this._originalFreqs) {
-      await this._pitchDetect();
+      await this._pitchDetect(currentVersion);
     }
     if (!this._autotonedFreqs) {
-      await this._pitchShift();
-    }
+        await this._pitchShift(currentVersion);
+      }
+    });
+    await this._queue;
   }
 
-  async _pitchDetect() {
+  async _pitchDetect(currentVersion: number) {
     const { audio, buffers } = this._recordingData;
     const freqData = await crepe.detectPitches(buffers);
+    if (this._version !== currentVersion) return;
     const freqs = new Float32Array(freqData.map((data) => data.freq));
     const confidences = new Float32Array(freqData.map((data) => data.confidence));
     const numWindows = await tuner.getNumWindows(
@@ -115,21 +125,29 @@ export class Autotoner {
       this._tunerWindowSize, 
       this._tunerOsamp,
     );
-    this._confidences = await tuner.resampleLinear(confidences, numWindows);
-    this._originalFreqs = await tuner.resampleLinear(freqs, numWindows);
+    if (this._version !== currentVersion) return;
+    const newConfidences = await tuner.resampleLinear(confidences, numWindows);
+    const newFreqs = await tuner.resampleLinear(freqs, numWindows);
+    if (this._version !== currentVersion) return;
+    this._confidences = newConfidences;
+    this._originalFreqs = newFreqs;
     this._autotonedFreqs = null;
   }
 
-  async _pitchShift() {
+  async _pitchShift(currentVersion: number) {
     const { audio, sampleRate } = this._recordingData;
-    this._autotonedFreqs = await tuner.pitchSnap(this._originalFreqs, this._scaleFreqs);
-    this._autotonedAudio = await tuner.pitchShift(
+    const newAutotonedFreqs = await tuner.pitchSnap(this._originalFreqs, this._scaleFreqs);
+    if (this._version !== currentVersion) return;
+    const newAutotonedAudio = await tuner.pitchShift(
       audio,
       sampleRate,
       this._tunerWindowSize,
       this._tunerOsamp,
       this._originalFreqs,
-      this._autotonedFreqs,
+      newAutotonedFreqs,
     );
+    if (this._version !== currentVersion) return;
+    this._autotonedFreqs = newAutotonedFreqs;
+    this._autotonedAudio = newAutotonedAudio;
   }
 }

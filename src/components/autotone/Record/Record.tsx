@@ -9,6 +9,7 @@ export const Record = ({
   isRecording,
   isProcessing,
   isMicAccessible,
+  error,
   record,
   stopRecording,
  }: any) => {
@@ -18,6 +19,8 @@ export const Record = ({
   let text;
   if (!isMicAccessible) {
     text = 'Microphone inaccessible.';
+  } else if (error) {
+    text = error;
   } else if (!isReady) {
     text = 'Loading CREPE model...';
   } else if (isProcessing) {
@@ -50,6 +53,7 @@ export const Record = ({
         onClick={onClick}
         Icon={isRecording ? FaStop : FaCircle}
         disabled={isDisabled}
+        ariaLabel={isRecording ? "Stop recording" : "Start recording"}
       />
     </Card>
   );

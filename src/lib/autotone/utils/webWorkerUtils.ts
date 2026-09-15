@@ -1,24 +1,39 @@
-// @ts-nocheck
 // These helpers abstract away the messaging interface of a web worker
 // to instead expose a promisified API
 
-// Should be called outside the wb worker
+interface WorkerMessageData {
+  type: string;
+  payload?: unknown;
+  messageId?: number;
+  error?: string;
+}
+
+interface WorkerMessageEvent extends MessageEvent {
+  data: WorkerMessageData;
+}
+
 let messageIdCounter = 0;
 
-export const createWebWorkerSender = (worker, key) => {
-  const pending = new Map();
+export const createWebWorkerSender = (worker: Worker, key: string) => {
+  const pending = new Map<number, { resolve: (value: unknown) => void; reject: (reason?: unknown) => void }>();
 
-  worker.addEventListener('message', (message) => {
+  const clearPending = (err: Error | Event) => { 
+    for (const {reject} of pending.values()) reject(err); 
+    pending.clear(); 
+  };
+  worker.addEventListener('error', (err: ErrorEvent) => clearPending(err));
+  worker.addEventListener('messageerror', (err: MessageEvent) => clearPending(err));
+  worker.addEventListener('message', (message: MessageEvent<WorkerMessageData>) => {
     const { type, payload, messageId, error } = message.data;
-    if (type === key && pending.has(messageId)) {
-      const { resolve, reject } = pending.get(messageId);
+    if (type === key && messageId !== undefined && pending.has(messageId)) {
+      const { resolve, reject } = pending.get(messageId)!;
       pending.delete(messageId);
       if (error) reject(new Error(error));
       else resolve(payload);
     }
   });
   
-  return (...args) => {
+  return (...args: unknown[]) => {
     return new Promise((resolve, reject) => {
       const messageId = ++messageIdCounter;
       pending.set(messageId, { resolve, reject });
@@ -27,20 +42,19 @@ export const createWebWorkerSender = (worker, key) => {
   };
 };
 
-// Should be called in the web worker
-export const createWebWorkerReceiver = (sendMessage, fns) => {
-  return async (message) => {
+export const createWebWorkerReceiver = (sendMessage: (msg: unknown) => void, fns: { key: string; fn: (...args: unknown[]) => Promise<unknown> | unknown }[]) => {
+  return async (message: MessageEvent<WorkerMessageData>) => {
     const { type, payload, messageId } = message.data;
     for (const { key, fn } of fns) {
       if (key === type) {
         try {
-          const result = await fn(...payload);
+          const result = await fn(...((payload as unknown[]) || []));
           sendMessage({ type: key, payload: result, messageId });
-        } catch (err) {
-          sendMessage({ type: key, error: err.message || 'Worker Error', messageId });
+        } catch (err: unknown) {
+          const errorMessage = err instanceof Error ? err.message : 'Worker Error';
+          sendMessage({ type: key, error: errorMessage, messageId });
         }
       }
     }
   };
 };
-

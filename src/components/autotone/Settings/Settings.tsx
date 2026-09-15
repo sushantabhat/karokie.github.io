@@ -50,6 +50,7 @@ export const Settings = ({
               options={NOTES}
               value={scaleBaseNote}
               setValue={setScaleBaseNote}
+              ariaLabel="Tonic"
             />
           </div>
           <div>
@@ -60,6 +61,7 @@ export const Settings = ({
               options={SCALE_TYPES.map((scale) => scale.name)}
               value={scaleName}
               setValue={setScaleName}
+              ariaLabel="Mode"
             />
           </div>
         </div>
@@ -78,6 +80,7 @@ export const Settings = ({
               options={powerOfTwos(5, 13)}
               value={tunerWindowSize}
               setValue={setTunerWindowSize}
+              ariaLabel="Window size"
             />
           </div>
           <div>
@@ -88,6 +91,7 @@ export const Settings = ({
               options={powerOfTwos(1, 10)}
               value={tunerOsamp}
               setValue={setTunerOsamp}
+              ariaLabel="Over-sampling"
             />
           </div>
         </div>

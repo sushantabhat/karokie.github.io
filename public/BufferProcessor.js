@@ -18,6 +18,8 @@ class BufferProcessor extends AudioWorkletProcessor {
     const { type } = event.data;
     if (type === 'reset') {
       this.reset();
+    } else if (type === 'finalize') {
+      this.port.postMessage({ type: 'finalizeAck', buffer: new Float32Array(this._buffer), count: this._bufferIndex });
     }
   }
 

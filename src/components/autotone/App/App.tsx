@@ -13,6 +13,7 @@ export const App = () => {
   const [isReady, setIsReady] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [isMicAccessible, setIsMicAccessible] = useState(true);
   const [originalAudio, setOriginalAudio] = useState(null);
   const [autotonedAudio, setAutotonedAudio] = useState(null);
@@ -36,9 +37,9 @@ export const App = () => {
     setIsProcessing(true);
     try {
       await autotoner.stopRecording();
-    } catch (e) {
+    } catch (e: unknown) {
       console.error(e);
-      throw e;
+      setError(e instanceof Error ? e.message : "Processing failed");
     } finally {
       setIsProcessing(false);
       setOriginalAudio(autotoner.getOriginalAudio());
@@ -47,14 +48,15 @@ export const App = () => {
   };
 
   const reAutotone = async () => {
+    setError(null);
     setOriginalAudio(null);
     setAutotonedAudio(null);
     setIsProcessing(true);
     try {
       await autotoner.autotone();
-    } catch (e) {
+    } catch (e: unknown) {
       console.error(e);
-      throw e;
+      setError(e instanceof Error ? e.message : "Processing failed");
     } finally {
       setIsProcessing(false);
       setOriginalAudio(autotoner.getOriginalAudio());
@@ -83,11 +85,16 @@ export const App = () => {
           isRecording={isRecording}
           isProcessing={isProcessing}
           isMicAccessible={isMicAccessible}
-          record={record}
+          error={error}
+          record={() => {
+            setError(null);
+            record();
+          }}
           stopRecording={stopRecording}
         />
         <Settings 
           originalAudio={originalAudio}
+          isProcessing={isProcessing}
           reAutotone={reAutotone}
           getAutotoner={() => autotoner}
         />

@@ -19,10 +19,15 @@ export const Player = ({
   color,
  }: any) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const playbackIdRef = useRef(0);
+  const timeoutRef = useRef();
   useEffect(() => {
     if (!audio && isPlaying) {
       player.stop();
       setIsPlaying(false);
+      playbackIdRef.current = 0;
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
       setProgress(0);
     }
   }, [audio]);
@@ -33,6 +38,8 @@ export const Player = ({
   // Clean up animation frame on unmount
   useEffect(() => {
     return () => {
+      playbackIdRef.current = 0;
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
   }, []);
@@ -59,18 +66,24 @@ export const Player = ({
     if (isPlaying) {
       player.stop();
       setIsPlaying(false);
+      playbackIdRef.current = 0;
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
       setProgress(0);
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     } else {
       setIsPlaying(true);
+      const currentId = ++playbackIdRef.current;
       setProgress(0);
       player.play(audio, getSampleRate(), () => {
         setIsPlaying(false);
+        if (playbackIdRef.current === currentId) playbackIdRef.current = 0;
         setProgress(0);
         if (animationRef.current) cancelAnimationFrame(animationRef.current);
       });
       // Start tracking time slightly after play to get accurate start
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
+        if (playbackIdRef.current !== currentId) return;
         const ctx = player.getAudioContext();
         if (ctx) {
           playStartTime.current = ctx.currentTime;
@@ -97,10 +110,12 @@ export const Player = ({
             onClick={onClickPlay}
             Icon={isPlaying ? FaStop : FaPlay}
             className={styles.button}
+            ariaLabel={isPlaying ? "Stop audio" : "Play audio"}
           />
           <Button
             small
             secondary
+            ariaLabel="Download audio"
             onClick={onClickDownload}
             Icon={FaDownload}
             className={styles.button}
