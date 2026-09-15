@@ -1,17 +1,17 @@
 import { FaCircle, FaStop } from 'react-icons/fa';
-import { Button } from '../shared/Button/Button.js';
-import { Card } from '../shared/Card/Card.js';
-import { Text } from '../shared/Text/Text.js';
+import { Button } from '../shared/Button/Button';
+import { Card } from '../shared/Card/Card';
+import { Text } from '../shared/Text/Text';
 import styles from './Record.module.css';
 
-export const Record = ({
+export const Record = ({ 
   isReady,
   isRecording,
   isProcessing,
   isMicAccessible,
   record,
   stopRecording,
-}) => {
+ }: any) => {
 
   const isDisabled = !isReady || isProcessing;
 

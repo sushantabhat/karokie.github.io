@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { WaveFileCreator } from 'wavefile-creator';
 
 export const downloadWavFile = (

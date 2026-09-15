@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Autotoner } from '../../../lib/autotone/autotone/Autotoner.js';
-import { Player } from '../Player/Player.js';
-import { Record } from '../Record/Record.js';
-import { Settings } from '../Settings/Settings.js';
-import { Text } from '../shared/Text/Text.js';
+import { Autotoner } from '../../../lib/autotone/autotone/Autotoner';
+import { Player } from '../Player/Player';
+import { Record } from '../Record/Record';
+import { Settings } from '../Settings/Settings';
+import { Text } from '../shared/Text/Text';
 import styles from './App.module.css';
 
 const autotoner = new Autotoner();

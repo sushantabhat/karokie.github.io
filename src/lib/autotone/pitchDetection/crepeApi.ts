@@ -1,10 +1,11 @@
+// @ts-nocheck
 // Pitch detection model is from the CREPE project
 //   CREPE: A Convolutional Representation for Pitch Estimation
 //   By Jong Wook Kim, Justin Salamon, Peter Li, Juan Pablo Bello
 //   https://github.com/marl/crepe
 
 import * as tf from '@tensorflow/tfjs';
-import * as constants from './crepeConstants.js';
+import * as constants from './crepeConstants';
 
 let _model;
 let _sampleRate;

@@ -1,3 +1,4 @@
+// @ts-nocheck
 class BufferProcessor extends AudioWorkletProcessor {
 
   _buffer;

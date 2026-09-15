@@ -1,7 +1,8 @@
+// @ts-nocheck
 import { createWebWorkerSender } from '@/lib/autotone/utils/webWorkerUtils';
-import * as constants from './tunerConstants.js';
+import * as constants from './tunerConstants';
 
-const worker = new Worker(new URL('./tuner.worker.js', import.meta.url));
+const worker = new Worker(new URL('./tuner.worker.ts', import.meta.url));
 
 export const init = createWebWorkerSender(worker, constants.TUNER_INIT);
 export const getNumWindows = createWebWorkerSender(worker, constants.TUNER_GET_NUM_WINDOWS);

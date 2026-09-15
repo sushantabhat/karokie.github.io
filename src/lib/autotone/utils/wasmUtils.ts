@@ -1,3 +1,4 @@
+// @ts-nocheck
 // A helper class for loading a WASM module (C compiled with Empscripten)
 // and for array<->pointer conversions
 

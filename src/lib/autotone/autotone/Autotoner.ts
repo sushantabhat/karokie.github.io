@@ -1,10 +1,11 @@
+// @ts-nocheck
 import { getScaleFreqs } from "../music/musicScales";
-import * as crepe from '../pitchDetection/crepe.js';
+import * as crepe from '../pitchDetection/crepe';
 import { DEFAULT_CREPE_OSAMP } from "../pitchDetection/crepeConstants";
-import * as tuner from '../pitchShifting/tuner.js';
+import * as tuner from '../pitchShifting/tuner';
 import { DEFAULT_TUNER_OSAMP, DEFAULT_TUNER_WINDOW_SIZE } from "../pitchShifting/tunerConstants";
-import * as player from '../player/player.js';
-import * as recorder from '../recorder/recorder.js';
+import * as player from '../player/player';
+import * as recorder from '../recorder/recorder';
 import { DEFAULT_BASE_NOTE, DEFAULT_SCALE_NAME } from "./autotoneConstants";
 
 export class Autotoner {

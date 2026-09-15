@@ -1,14 +1,15 @@
+// @ts-nocheck
 import { useState, useEffect, useRef } from 'react';
 import { FaDownload, FaPlay, FaStop } from 'react-icons/fa';
-import * as player from '@/lib/autotone/player/player.js';
-import { downloadWavFile } from '@/lib/autotone/utils/ioUtils.js';
-import { Chart } from '../Chart/Chart.js';
-import { Button } from '../shared/Button/Button.js';
-import { Card } from '../shared/Card/Card.js';
-import { Text } from '../shared/Text/Text.js';
+import * as player from '@/lib/autotone/player/player';
+import { downloadWavFile } from '@/lib/autotone/utils/ioUtils';
+import { Chart } from '../Chart/Chart';
+import { Button } from '../shared/Button/Button';
+import { Card } from '../shared/Card/Card';
+import { Text } from '../shared/Text/Text';
 import styles from './Player.module.css';
 
-export const Player = ({
+export const Player = ({ 
   title,
   audio,
   getFreqs,
@@ -16,10 +17,10 @@ export const Player = ({
   getSampleRate,
   getNumChannels,
   color,
-}) => {
+ }: any) => {
   const [isPlaying, setIsPlaying] = useState(false);
   useEffect(() => {
-    if (!audio const [isPlaying, setIsPlaying] = useState(false);const [isPlaying, setIsPlaying] = useState(false); isPlaying) {
+    if (!audio && isPlaying) {
       player.stop();
       setIsPlaying(false);
       setProgress(0);

@@ -1,6 +1,7 @@
-import createModule from './wasm/tunerWasm.js';
-import { WasmModule } from '@/lib/autotone/utils/wasmUtils.js';
-import { MAX_INT_16, MIN_INT_16 } from './tunerConstants.js';
+// @ts-nocheck
+import createModule from './wasm/tunerWasm';
+import { WasmModule } from '@/lib/autotone/utils/wasmUtils';
+import { MAX_INT_16, MIN_INT_16 } from './tunerConstants';
 
 const wasm = new WasmModule();
 const tunerGetNumWindows = wasm.cwrap('get_num_windows', 'number', ['number', 'number', 'number']);

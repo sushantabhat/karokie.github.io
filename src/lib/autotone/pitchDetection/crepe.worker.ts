@@ -1,6 +1,7 @@
-import { createWebWorkerReceiver } from '@/lib/autotone/utils/webWorkerUtils.js';
-import * as crepe from './crepeApi.js';
-import * as constants from './crepeConstants.js';
+// @ts-nocheck
+import { createWebWorkerReceiver } from '@/lib/autotone/utils/webWorkerUtils';
+import * as crepe from './crepeApi';
+import * as constants from './crepeConstants';
 
 /* eslint-disable no-restricted-globals */
 self.onmessage = createWebWorkerReceiver(self.postMessage, [

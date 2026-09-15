@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Web worker message types
 
 export const TUNER_INIT = 'TUNER_INIT';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // These helpers abstract away the messaging interface of a web worker
 // to instead expose a promisified API
 

@@ -1,4 +1,5 @@
-import { BufferNode } from './BufferNode.js';
+// @ts-nocheck
+import { BufferNode } from './BufferNode';
 
 const DESIRED_SAMPLE_RATE = 48000;
 

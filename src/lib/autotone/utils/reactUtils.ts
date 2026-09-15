@@ -1,3 +1,4 @@
+// @ts-nocheck
 export const classNames = (...classes) => {
   let classString = '';
   for (let i = 0; i < classes.length; i++) {

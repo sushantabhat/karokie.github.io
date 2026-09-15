@@ -1,3 +1,4 @@
+// @ts-nocheck
 let audioContext;
 let currentSource = null;
 

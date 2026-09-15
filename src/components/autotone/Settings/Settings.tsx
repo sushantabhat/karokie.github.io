@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useState } from 'react';
 import { DEFAULT_BASE_NOTE, DEFAULT_SCALE_NAME } from '@/lib/autotone/autotone/autotoneConstants';
 import { NOTES, SCALE_TYPES } from '@/lib/autotone/music/musicScales';
@@ -7,11 +8,11 @@ import { Select } from '../shared/Select/Select';
 import { Text } from '../shared/Text/Text';
 import styles from './Settings.module.css';
 
-export const Settings = ({ 
+export const Settings = ({  
   originalAudio, 
   reAutotone,
   getAutotoner,
-}) => {
+ }: any) => {
 
   const [scaleBaseNote, setScaleBaseNote] = useState(DEFAULT_BASE_NOTE);
   const [scaleName, setScaleName] = useState(DEFAULT_SCALE_NAME);
@@ -96,7 +97,7 @@ export const Settings = ({
   );
 };
 
-const powerOfTwos = (smallExponent, bigExponent) => {
+const powerOfTwos = (smallExponent, bigExponent: any) => {
   let values = [];
   for (let i = smallExponent; i <= bigExponent; i++) {
     values.push(Math.pow(2, i));

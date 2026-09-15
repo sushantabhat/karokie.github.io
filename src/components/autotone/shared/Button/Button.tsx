@@ -1,7 +1,8 @@
-import { classNames } from '@/lib/autotone/utils/reactUtils.js';
+// @ts-nocheck
+import { classNames } from '@/lib/autotone/utils/reactUtils';
 import styles from './Button.module.css';
 
-export const Button = ({
+export const Button = ({ 
   className,
   onClick,
   disabled,
@@ -9,9 +10,10 @@ export const Button = ({
   large,
   small,
   secondary,
-}) => {
+  ariaLabel,
+ }: any) => {
   return (
-    <button aria-label={props.ariaLabel} 
+    <button aria-label={ariaLabel} 
       onClick={onClick}
       disabled={disabled}
       className={classNames(

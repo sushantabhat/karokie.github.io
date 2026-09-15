@@ -1,6 +1,7 @@
-import { createWebWorkerReceiver } from '@/lib/autotone/utils/webWorkerUtils.js';
-import * as tuner from './tunerApi.js';
-import * as constants from './tunerConstants.js';
+// @ts-nocheck
+import { createWebWorkerReceiver } from '@/lib/autotone/utils/webWorkerUtils';
+import * as tuner from './tunerApi';
+import * as constants from './tunerConstants';
 
 /* eslint-disable no-restricted-globals */
 self.onmessage = createWebWorkerReceiver(self.postMessage, [

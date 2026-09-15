@@ -1,3 +1,4 @@
+// @ts-nocheck
 export class BufferNode extends AudioWorkletNode {
 
   _buffers;

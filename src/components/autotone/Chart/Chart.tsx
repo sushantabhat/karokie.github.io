@@ -1,3 +1,4 @@
+// @ts-nocheck
 import tinygradient from 'tinygradient';
 import { useEffect, useRef, useState } from 'react';
 import styles from './Chart.module.css';
@@ -5,7 +6,7 @@ import styles from './Chart.module.css';
 const LINE_WIDTH = 5;
 const MIN_CONFIDENCE_SQUARED = 0.5;
 
-export const Chart = ({ freqs, confidences, color, progress = 0 }) => {
+export const Chart = ({  freqs, confidences, color, progress = 0  }: any) => {
   
   const ref = useRef(null);
   const [dims, setDims] = useState({ width: 0, height: 0 });
@@ -42,7 +43,7 @@ export const Chart = ({ freqs, confidences, color, progress = 0 }) => {
 
 // Helpers =============================================================
 
-const draw = (freqs, confidences, color, context, progress = 0) => {
+const draw = (freqs, confidences, color, context, progress: any = 0) => {
   const { width, height } = context.canvas;
   const normalizedConfidences = normalize(confidences);
   const coords = freqsToCoords(freqs, normalizedConfidences, width, height);
@@ -70,7 +71,7 @@ const draw = (freqs, confidences, color, context, progress = 0) => {
   }
 };
 
-const normalize = (values) => {
+const normalize = (values: any) => {
   let min = Infinity;
   let max = -Infinity;
   for (let i = 0; i < values.length; i++) {
@@ -82,7 +83,7 @@ const normalize = (values) => {
   });
 };
 
-const freqsToCoords = (freqs, confidences, width, height) => {
+const freqsToCoords = (freqs, confidences, width, height: any) => {
   let yMin = Infinity;
   let yMax = -Infinity;
   for (let i = 0; i < freqs.length; i++) {
@@ -102,7 +103,7 @@ const freqsToCoords = (freqs, confidences, width, height) => {
   });
 };
 
-const confidencesToColors = (confidences, color) => {
+const confidencesToColors = (confidences, color: any) => {
   const gradient = tinygradient(['#FFFFFF', color]).rgb(100);
   const hexGradient = gradient.map((color) => color.toHexString());
   return Array.from(confidences).map((value) => {

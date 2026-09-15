@@ -1,7 +1,7 @@
-import { classNames } from '@/lib/autotone/utils/reactUtils.js';
+import { classNames } from '@/lib/autotone/utils/reactUtils';
 import styles from './Card.module.css';
 
-export const Card = ({ className, children }) => {
+export const Card = ({  className, children  }: any) => {
   return (
     <div className={classNames(
       className,
