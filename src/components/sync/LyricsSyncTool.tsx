@@ -19,6 +19,13 @@ export function LyricsSyncTool() {
 
   const [trackFile, setTrackFile] = useState<File | null>(null);
   const [trackUrl, setTrackUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (trackUrl) URL.revokeObjectURL(trackUrl);
+    };
+  }, [trackUrl]);
+
   const [rawLyricsText, setRawLyricsText] = useState("");
   const [lyrics, setLyrics] = useState<LineSync[]>([]);
 

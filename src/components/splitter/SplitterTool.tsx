@@ -22,6 +22,15 @@ export default function SplitterTool() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [instrumentalUrl, setInstrumentalUrl] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (instrumentalUrl) {
+        URL.revokeObjectURL(instrumentalUrl);
+      }
+    };
+  }, [instrumentalUrl]);
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [format, setFormat] = useState<'wav' | 'mp3'>('mp3');
   const [isExporting, setIsExporting] = useState(false);
@@ -47,8 +56,13 @@ export default function SplitterTool() {
       const arrayBuffer = await file.arrayBuffer();
       setProgress(30);
 
+      let audioBuffer: AudioBuffer;
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+      try {
+        audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+      } finally {
+        await audioCtx.close();
+      }
       setProgress(60);
 
       // Advanced DSP Center-Cancellation (Karaoke Effect)

@@ -415,6 +415,14 @@ export default function CutterTool() {
     setHasUnsavedChanges(tracks.length > 0);
   }, [tracks, setHasUnsavedChanges]);
 
+  useEffect(() => {
+    return () => {
+      if (audioCtx && audioCtx.state !== 'closed') {
+        audioCtx.close();
+      }
+    };
+  }, [audioCtx]);
+
   const triggerUpload = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = ''; // Reset
@@ -513,6 +521,7 @@ export default function CutterTool() {
       a.href = url;
       a.download = tracks.length > 1 ? `Merged_Audio.${format}` : `Cut_Audio.${format}`;
       a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (err) {
       console.error(err);
       alert("Error processing audio");

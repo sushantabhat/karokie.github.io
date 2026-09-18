@@ -175,6 +175,7 @@ export const playCountIn = async (bpm: number) => {
       osc.stop(time + 0.1);
     }
     setTimeout(() => {
+      ctx.close();
       resolve();
     }, (beatDuration * 4 + 0.1) * 1000);
   });
@@ -221,6 +222,13 @@ export default function KaraokeStudio() {
   const [trackFile, setTrackFile] = useState<File | null>(null);
   const isVideo = trackFile && trackFile.type.startsWith('video/');
   const [trackUrl, setTrackUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (trackUrl) URL.revokeObjectURL(trackUrl);
+    };
+  }, [trackUrl]);
+
   const [headphonesConfirmed, setHeadphonesConfirmed] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [runTour, setRunTour] = useState(false);

@@ -321,8 +321,13 @@ export default function VoiceChangerTool() {
       const ctx = new OfflineAudioContext(2, 44100 * 300, 44100); // 5 minutes max
       const arrayBuffer = await recordedBlob.arrayBuffer();
       // Need a fresh context to decode because Offline context can't decode easily in some browsers
+      let audioBuffer: AudioBuffer;
       const decodeCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const audioBuffer = await decodeCtx.decodeAudioData(arrayBuffer);
+      try {
+        audioBuffer = await decodeCtx.decodeAudioData(arrayBuffer);
+      } finally {
+        await decodeCtx.close();
+      }
       
       // Re-create offline buffer length accurately
       const offlineCtx = new OfflineAudioContext(
