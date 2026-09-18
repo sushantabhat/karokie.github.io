@@ -5,10 +5,12 @@ import { Record } from '../Record/Record';
 import { Settings } from '../Settings/Settings';
 import { Text } from '../shared/Text/Text';
 import styles from './App.module.css';
+import { useUnsavedChanges } from "@/providers/UnsavedChangesProvider";
 
 const autotoner = new Autotoner();
 
 export const App = () => {
+  const { setHasUnsavedChanges } = useUnsavedChanges();
   
   const [isReady, setIsReady] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -17,6 +19,10 @@ export const App = () => {
   const [isMicAccessible, setIsMicAccessible] = useState(true);
   const [originalAudio, setOriginalAudio] = useState(null);
   const [autotonedAudio, setAutotonedAudio] = useState(null);
+
+  useEffect(() => {
+    setHasUnsavedChanges(originalAudio !== null || autotonedAudio !== null);
+  }, [originalAudio, autotonedAudio, setHasUnsavedChanges]);
 
   useEffect(() => {
     autotoner

@@ -8,10 +8,12 @@ import {
 import { useAudioMixer } from "@/hooks/useAudioMixer";
 import { useTheme } from "@/hooks/useTheme";
 import WaveformEditor from "@/components/shared/WaveformEditor";
+import { useUnsavedChanges } from "@/providers/UnsavedChangesProvider";
 
 export type LineSync = { id: string; text: string; start: number | null; end: number | null; };
 
 export function LyricsSyncTool() {
+  const { setHasUnsavedChanges } = useUnsavedChanges();
   const { loadTrack, trackBuffer } = useAudioMixer();
   const { theme } = useTheme();
 
@@ -19,6 +21,10 @@ export function LyricsSyncTool() {
   const [trackUrl, setTrackUrl] = useState<string | null>(null);
   const [rawLyricsText, setRawLyricsText] = useState("");
   const [lyrics, setLyrics] = useState<LineSync[]>([]);
+
+  useEffect(() => {
+    setHasUnsavedChanges(trackFile !== null || lyrics.length > 0);
+  }, [trackFile, lyrics, setHasUnsavedChanges]);
   const [activeLineIndex, setActiveLineIndex] = useState(0);
   const [isSyncSessionActive, setIsSyncSessionActive] = useState(false);
   const [isSpacebarDown, setIsSpacebarDown] = useState(false);

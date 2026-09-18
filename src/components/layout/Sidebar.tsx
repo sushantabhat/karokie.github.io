@@ -2,30 +2,64 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Mic2, Music, CircleDot, HelpCircle, Menu, X, MessageCircle, Moon, Sun, Scissors, Link as LinkIcon, Wand2, Activity } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Mic2, Music, CircleDot, HelpCircle, Menu, X, MessageCircle, Moon, Sun, Scissors, Link as LinkIcon, Wand2, Activity, Trash2 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
+import { useUnsavedChanges } from "@/providers/UnsavedChangesProvider";
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  
+  const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
+
+  const [pendingPath, setPendingPath] = useState<string | null>(null);
+  const [showWarning, setShowWarning] = useState(false);
 
   const tools = [
     { name: "Karaoke", href: "/karaoke", icon: Mic2, disabled: false },
     { name: "Lyrics Sync", href: "/sync", icon: Music, disabled: false },
     { name: "Voice Changer", href: "/recorder", icon: CircleDot, disabled: false, badge: "" },
-    // Adding placeholders for the tools shown in the user's reference image
     { name: "Remover", href: "/splitter", icon: Wand2, disabled: false, badge: "" },
     { name: "Cutter / Splitter", href: "/cutter", icon: Scissors, disabled: false, badge: "" },
     { name: "Autotune", href: "/autotune", icon: Activity, disabled: false, badge: "" },
-    
   ];
 
   const bottomLinks = [
     { name: "About", href: "/about", icon: HelpCircle },
     { name: "Discord", href: "https://discord.gg/PG4ePQWTDh", icon: MessageCircle, external: true },
   ];
+
+  const handleNavClick = (e: React.MouseEvent, href: string, isExternal?: boolean) => {
+    if (isExternal) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+
+    if (pathname !== href) {
+      if (!hasUnsavedChanges) {
+        return; // Let standard link navigation proceed since no unsaved changes
+      }
+      e.preventDefault();
+      setPendingPath(href);
+      setShowWarning(true);
+    }
+  };
+
+  const confirmNavigation = () => {
+    if (pendingPath) {
+      setHasUnsavedChanges(false);
+      router.push(pendingPath);
+      setShowWarning(false);
+      setPendingPath(null);
+      setMobileMenuOpen(false);
+    }
+  };
+
+  const cancelNavigation = () => {
+    setShowWarning(false);
+    setPendingPath(null);
+  };
 
   return (
     <>
@@ -54,6 +88,7 @@ export function Sidebar() {
               <Link
                 key={tool.name}
                 href={tool.href}
+                onClick={(e) => handleNavClick(e, tool.href)}
                 className={`flex flex-col items-center justify-center p-3 transition-colors relative
                   ${isActive 
                     ? "text-[#38bdf8] bg-control/20" 
@@ -90,6 +125,7 @@ export function Sidebar() {
                 key={link.name}
                 href={link.href}
                 {...linkProps}
+                onClick={(e) => handleNavClick(e, link.href, isExternal)}
                 className={`flex flex-col items-center justify-center p-3 transition-colors relative
                   ${isActive 
                     ? "text-[#38bdf8] bg-control/20" 
@@ -125,7 +161,21 @@ export function Sidebar() {
               <Menu className="w-6 h-6" />
             </button>
             <div className="flex items-center gap-4">
-              <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-control rounded-lg transition-colors">
+              <Link href="/about" onClick={(e) => {
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+                
+                if (pathname !== "/about") {
+                  if (!hasUnsavedChanges) {
+                    setMobileMenuOpen(false);
+                    return;
+                  }
+                  e.preventDefault();
+                  setPendingPath("/about");
+                  setShowWarning(true);
+                } else {
+                  setMobileMenuOpen(false);
+                }
+              }} className="p-2 hover:bg-control rounded-lg transition-colors">
                 <HelpCircle className="w-6 h-6" />
               </Link>
               <button onClick={toggleTheme} className="p-2 hover:bg-control rounded-lg transition-colors">
@@ -149,7 +199,19 @@ export function Sidebar() {
                       e.preventDefault();
                       return;
                     }
-                    setMobileMenuOpen(false);
+                    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+                    
+                    if (pathname !== tool.href) {
+                      if (!hasUnsavedChanges) {
+                        setMobileMenuOpen(false);
+                        return;
+                      }
+                      e.preventDefault();
+                      setPendingPath(tool.href);
+                      setShowWarning(true);
+                    } else {
+                      setMobileMenuOpen(false);
+                    }
                   }}
                   className={`relative flex flex-col items-center justify-center aspect-square rounded-xl transition-all
                     ${isActive 
@@ -183,7 +245,36 @@ export function Sidebar() {
               Join our Discord
             </Link>
           </div>
+        </div>
+      )}
 
+      {/* Full-screen Warning Modal */}
+      {showWarning && (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#13151a]/95 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="max-w-2xl w-full mx-auto px-6 flex flex-col items-center text-center">
+            <h2 className="text-2xl md:text-3xl font-medium text-white mb-4">
+              Are you sure you want to switch tools?
+            </h2>
+            <p className="text-base md:text-lg text-white/70 mb-10 max-w-lg">
+              Any unsaved progress or audio track settings will be deleted along with it.
+            </p>
+            
+            <div className="flex items-center gap-6">
+              <button
+                onClick={confirmNavigation}
+                className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium bg-[#ff4d4f] hover:bg-[#ff4d4f]/90 text-white rounded-full transition-all hover:scale-105 active:scale-95"
+              >
+                <Trash2 className="w-4 h-4" />
+                Yes, discard
+              </button>
+              <button
+                onClick={cancelNavigation}
+                className="px-6 py-2.5 text-sm font-medium text-white/80 hover:text-white transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </>

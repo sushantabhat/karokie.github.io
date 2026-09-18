@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Play, Square, Scissors, Trash2, Download, Plus, Music, ChevronUp, ChevronDown, RotateCcw, RotateCw } from "lucide-react";
 import { audioBufferToWav } from "@/utils/audioBufferToWav";
 import { audioBufferToMp3 } from "@/utils/audioBufferToMp3";
+import { useUnsavedChanges } from "@/providers/UnsavedChangesProvider";
 
 declare global {
   interface Window {
@@ -407,6 +408,12 @@ export default function CutterTool() {
   const [format, setFormat] = useState<'wav' | 'mp3'>('mp3');
   const [audioCtx, setAudioCtx] = useState<AudioContext | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const { setHasUnsavedChanges } = useUnsavedChanges();
+
+  useEffect(() => {
+    setHasUnsavedChanges(tracks.length > 0);
+  }, [tracks, setHasUnsavedChanges]);
 
   const triggerUpload = () => {
     if (fileInputRef.current) {

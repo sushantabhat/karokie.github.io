@@ -4,6 +4,7 @@ import React, { useState, useRef } from "react";
 import { Upload, Music, Play, Square, Download, Sparkles, RefreshCcw, Activity, Wand2, CheckCircle2 } from "lucide-react";
 import { audioBufferToWav } from "@/utils/audioBufferToWav";
 import { audioBufferToMp3 } from "@/utils/audioBufferToMp3";
+import { useUnsavedChanges } from "@/providers/UnsavedChangesProvider";
 
 declare global {
   interface Window {
@@ -12,7 +13,12 @@ declare global {
 }
 
 export default function SplitterTool() {
+  const { setHasUnsavedChanges } = useUnsavedChanges();
   const [file, setFile] = useState<File | null>(null);
+
+  React.useEffect(() => {
+    setHasUnsavedChanges(file !== null);
+  }, [file, setHasUnsavedChanges]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [instrumentalUrl, setInstrumentalUrl] = useState<string | null>(null);

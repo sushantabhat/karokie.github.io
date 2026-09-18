@@ -9,6 +9,7 @@ import { Upload, Headphones, Mic, Play, Pause, Square, Settings2, Download, Chec
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { useAudioMixer, MixSettings } from '@/hooks/useAudioMixer';
 import { useTheme } from '@/hooks/useTheme';
+import { useUnsavedChanges } from '@/providers/UnsavedChangesProvider';
 import { saveTrackToDB, getTrackFromDB, saveVocalToDB, getVocalFromDB, clearTrackFromDB, clearVocalFromDB } from '@/utils/indexedDB';
 import { audioBufferToWav } from '@/utils/audioBufferToWav';
 import { track } from "@vercel/analytics";
@@ -211,21 +212,12 @@ const loadLyricsFromLocalStorage = (hash: string) => {
 };
 
 const saveLyricsToLocalStorage = (hash: string, ly: LineSync[]) => {
-  localStorage.setItem(`lyrics-autosave-${hash}`, JSON.stringify(ly));
-  // Update the LRU index
-  const indexRaw = localStorage.getItem(AUTOSAVE_INDEX_KEY);
-  const index: string[] = indexRaw ? JSON.parse(indexRaw) : [];
-  const existingPos = index.indexOf(hash);
-  if (existingPos !== -1) index.splice(existingPos, 1);
-  index.unshift(hash); // most recent at front
-  if (index.length > AUTOSAVE_MAX) {
-    const evicted = index.pop();
-    if (evicted) localStorage.removeItem(`lyrics-autosave-${evicted}`);
-  }
-  localStorage.setItem(AUTOSAVE_INDEX_KEY, JSON.stringify(index));
+  // Disabled as per request to not save any data for karaoke studio
+  return;
 };
 
 export default function KaraokeStudio() {
+  const { setHasUnsavedChanges } = useUnsavedChanges();
   const [trackFile, setTrackFile] = useState<File | null>(null);
   const isVideo = trackFile && trackFile.type.startsWith('video/');
   const [trackUrl, setTrackUrl] = useState<string | null>(null);
@@ -361,18 +353,14 @@ export default function KaraokeStudio() {
     restoreSession();
   }, [loadTrack, loadVocal]);
 
-  // Auto-save playback time
+  // Auto-save playback time (Disabled per request)
+  // useEffect(() => {
+  //   // localStorage.setItem('playbackTime', currentTime.toString());
+  // }, [currentTime]);
+  // Update unsaved changes state when track, vocals, or lyrics change
   useEffect(() => {
-    localStorage.setItem('playbackTime', currentTime.toString());
-  }, [currentTime]);
-
-  // Auto-save vocal buffer when it changes
-  useEffect(() => {
-    if (vocalBuffer) {
-      const blob = audioBufferToWav(vocalBuffer);
-      saveVocalToDB(blob).catch(console.error);
-    }
-  }, [vocalBuffer]);
+    setHasUnsavedChanges(trackFile !== null || vocalBuffer !== null || lyrics.length > 0 || rawLyricsText.trim() !== "");
+  }, [trackFile, vocalBuffer, lyrics, rawLyricsText, setHasUnsavedChanges]);
 
   const handleJoyrideCallback = (data: EventData) => {
     const { status } = data;
@@ -457,8 +445,8 @@ export default function KaraokeStudio() {
         setTimeout(() => setAutoSaved(false), 3000);
       }
       
-      // Save track to IndexedDB to survive refresh
-      await saveTrackToDB({ file, hash, name: file.name });
+      // Save track to IndexedDB disabled per request
+      // await saveTrackToDB({ file, hash, name: file.name });
       
       await loadTrack(file);
     }

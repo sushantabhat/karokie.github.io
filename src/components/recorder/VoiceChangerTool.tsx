@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, Square, Play, Download, Trash2, Sparkles, Ghost, Radio, Mic2 } from 'lucide-react';
 import { audioBufferToMp3 } from '@/utils/audioBufferToMp3';
+import { useUnsavedChanges } from '@/providers/UnsavedChangesProvider';
 
 type EffectType = 'normal' | 'chipmunk' | 'monster' | 'robot' | 'radio' | 'alien' | 'cave' | 'studio';
 
@@ -45,6 +46,12 @@ export default function VoiceChangerTool() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number>(0);
+
+  const { setHasUnsavedChanges } = useUnsavedChanges();
+
+  useEffect(() => {
+    setHasUnsavedChanges(recordedBlob !== null);
+  }, [recordedBlob, setHasUnsavedChanges]);
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
