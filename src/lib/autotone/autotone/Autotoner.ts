@@ -33,9 +33,13 @@ export class Autotoner {
     const { sampleRate } = await recorder.init();
     const crepeBufferSize = await crepe.getBufferSize(sampleRate);
     await recorder.initBufferProcessor(crepeBufferSize, this._crepeOsamp);
+    await crepe.init(sampleRate); // Keep original mic rate
+  }
+
+  async initUpload() {
     await player.init();
-    await crepe.init(sampleRate);
     await tuner.init();
+    await crepe.init(48000); // Initialize with default to load WASM/models
   }
 
   record() {
@@ -51,6 +55,45 @@ export class Autotoner {
     await recorder.stop();
     this._recordingData = recorder.getData();
     await this.autotone();
+  }
+
+  async loadAudio(file: File) {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const decodedBuffer = await audioContext.decodeAudioData(arrayBuffer);
+      
+      const audio = decodedBuffer.getChannelData(0);
+      const sampleRate = decodedBuffer.sampleRate;
+
+      await crepe.init(sampleRate);
+
+      const crepeBufferSize = await crepe.getBufferSize(sampleRate);
+      const osamp = this._crepeOsamp;
+      const hopSize = crepeBufferSize / osamp;
+
+      const buffers = [];
+      for (let i = 0; i + crepeBufferSize <= audio.length; i += hopSize) {
+        buffers.push(audio.slice(i, i + crepeBufferSize));
+      }
+      
+      this._recordingData = {
+        sampleRate,
+        audio,
+        buffers,
+        bufferSize: crepeBufferSize,
+        osamp
+      };
+
+      this._originalFreqs = null;
+      this._autotonedFreqs = null;
+      this._autotonedAudio = null;
+      this._confidences = null;
+      this._version++;
+      await this.autotone();
+    } finally {
+      await audioContext.close();
+    }
   }
 
   getSampleRate() {
