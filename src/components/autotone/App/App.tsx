@@ -3,6 +3,7 @@ import { Autotoner } from '../../../lib/autotone/autotone/Autotoner';
 import { Player } from '../Player/Player';
 import { Record } from '../Record/Record';
 import { Settings } from '../Settings/Settings';
+import { ProcessingOverlay } from '../../shared/ProcessingOverlay';
 import { Text } from '../shared/Text/Text';
 import styles from './App.module.css';
 import { useUnsavedChanges } from "@/providers/UnsavedChangesProvider";
@@ -126,7 +127,8 @@ export const App = () => {
           </div>
         </div>
       ) : (
-        <div className={styles.container}>
+        <div className={`${styles.container} relative`}>
+          <ProcessingOverlay isVisible={isProcessing} text="Tuning & Processing audio..." />
           <div className={styles.header}>
             <div className={styles.headerText}>
               <Text className={styles.title}>

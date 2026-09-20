@@ -5,6 +5,7 @@ import { Upload, Music, Play, Square, Download, Sparkles, RefreshCcw, Activity, 
 import { audioBufferToWav } from "@/utils/audioBufferToWav";
 import { audioBufferToMp3 } from "@/utils/audioBufferToMp3";
 import { useUnsavedChanges } from "@/providers/UnsavedChangesProvider";
+import { ProcessingOverlay } from "../shared/ProcessingOverlay";
 
 declare global {
   interface Window {
@@ -188,7 +189,7 @@ export default function SplitterTool() {
 
   return (
     <div id="top" className="flex-1 overflow-y-auto bg-background relative font-sans text-foreground scroll-smooth">
-      
+      <ProcessingOverlay isVisible={isProcessing} progress={progress} text="Isolating frequencies & removing vocals..." />
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
       {!file && !isProcessing && (
         <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-500 max-w-2xl mx-auto">
@@ -234,21 +235,6 @@ export default function SplitterTool() {
             <Sparkles className="w-5 h-5" />
             Extract Instrumental
           </button>
-        </div>
-      )}
-
-      {isProcessing && (
-        <div className="flex flex-col items-center text-center py-8 animate-in fade-in duration-300 max-w-md w-full">
-          <div className="w-20 h-20 rounded-full border-4 border-edge/30 border-t-[#38bdf8] animate-spin mb-6" />
-          <h3 className="font-bold text-xl mb-2">Analyzing Frequencies...</h3>
-          <p className="text-muted text-sm mb-6 text-center">Using advanced DSP phase-cancellation to isolate and remove center-panned vocals.</p>
-          
-          <div className="w-full h-3 bg-control rounded-full overflow-hidden border border-edge/20">
-            <div 
-              className="h-full bg-gradient-to-r from-[#38bdf8] to-[#818cf8] transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
         </div>
       )}
 

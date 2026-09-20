@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, Square, Play, Download, Trash2, Sparkles, Ghost, Radio, Mic2 } from 'lucide-react';
+import { Mic, Square, Play, Download, Trash2, Sparkles, Ghost, Radio, Mic2, Upload } from 'lucide-react';
 import { audioBufferToMp3 } from '@/utils/audioBufferToMp3';
 import { useUnsavedChanges } from '@/providers/UnsavedChangesProvider';
 
@@ -30,6 +30,8 @@ function makeDistortionCurve(amount = 50) {
   return curve;
 }
 
+import { ProcessingOverlay } from "../shared/ProcessingOverlay";
+
 export default function VoiceChangerTool() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
@@ -46,6 +48,14 @@ export default function VoiceChangerTool() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number>(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setRecordedBlob(file);
+    }
+  };
 
   const { setHasUnsavedChanges } = useUnsavedChanges();
 
@@ -363,7 +373,8 @@ export default function VoiceChangerTool() {
   };
 
   return (
-    <div id="top" className="flex-1 overflow-y-auto bg-background pt-16 px-4 pb-4 md:p-8 scroll-smooth">
+    <div id="top" className="flex-1 relative overflow-y-auto bg-background pt-16 px-4 pb-4 md:p-8 scroll-smooth">
+      <ProcessingOverlay isVisible={isProcessing} text="Applying voice effect & exporting..." />
       <div className="max-w-4xl mx-auto space-y-8 min-h-screen flex flex-col justify-center">
         
         {/* Header */}
@@ -413,7 +424,32 @@ export default function VoiceChangerTool() {
                   <span className="font-bold text-sm tracking-widest">{isRecording ? "STOP RECORDING" : "TAP TO RECORD"}</span>
                 </button>
                 {isRecording && <div className="text-red-400 font-bold animate-pulse mt-2">Recording... Tap to stop.</div>}
-                {!isRecording && <div className="text-muted text-sm max-w-xs text-center mt-2">Tap the button, say something funny, and tap again when done!</div>}
+                
+                {!isRecording && (
+                  <>
+                    <div className="text-muted text-sm max-w-xs text-center mt-2">Tap the button, say something funny, and tap again when done!</div>
+                    <div className="flex items-center gap-4 mt-2 w-full max-w-xs">
+                      <div className="h-px bg-edge/20 flex-1" />
+                      <span className="text-xs text-secondary font-bold uppercase tracking-widest">or</span>
+                      <div className="h-px bg-edge/20 flex-1" />
+                    </div>
+                    
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleUpload}
+                      accept="audio/*"
+                      className="hidden"
+                    />
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-6 py-2.5 rounded-full bg-control hover:bg-control-hover text-foreground font-bold text-sm tracking-wide transition-colors flex items-center gap-2 border border-edge/20 shadow-sm"
+                    >
+                      <Upload className="w-4 h-4" />
+                      Upload Audio
+                    </button>
+                  </>
+                )}
               </div>
             ) : (
               <div className="flex flex-col items-center gap-6 w-full max-w-lg bg-panel backdrop-blur-md p-6 rounded-2xl border border-edge/20 shadow-xl">

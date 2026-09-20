@@ -402,6 +402,8 @@ function WaveformTrack({
 // -------------------------------------------------------------
 // CutterTool: Vertical Timeline App
 // -------------------------------------------------------------
+import { ProcessingOverlay } from "../shared/ProcessingOverlay";
+
 export default function CutterTool() {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -532,6 +534,7 @@ export default function CutterTool() {
 
   return (
     <div className="flex-1 w-full h-full bg-background flex flex-col font-sans text-foreground relative min-h-0">
+      <ProcessingOverlay isVisible={isProcessing} text="Exporting audio..." />
       
       {/* Hidden file input used by + buttons */}
       <input 
