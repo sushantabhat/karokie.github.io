@@ -12,12 +12,11 @@ export function Sidebar() {
   const router = useRouter();
   const [menuOpenPath, setMenuOpenPath] = useState<string | null>(null);
 
-  // Clear menuOpenPath if the pathname changes so it doesn't accidentally reopen on back navigation
-  useEffect(() => {
-    if (menuOpenPath !== null && menuOpenPath !== pathname) {
-      setMenuOpenPath(null);
-    }
-  }, [pathname, menuOpenPath]);
+  // Render-safe state reset: clear menuOpenPath if the pathname changes
+  // This avoids useEffect cascading renders while ensuring the menu closes on back/forward navigation.
+  if (menuOpenPath !== null && menuOpenPath !== pathname) {
+    setMenuOpenPath(null);
+  }
 
   const mobileMenuOpen = menuOpenPath === pathname;
   const { theme, toggleTheme } = useTheme();
