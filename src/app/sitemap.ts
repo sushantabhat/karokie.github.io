@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   // Use the environment variable if available, otherwise default to a generic domain
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://karaokestudio.app';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.karaokestudio.me';
 
   return [
     {
