@@ -368,6 +368,7 @@ export default function KaraokeStudio() {
   // Update unsaved changes state when track, vocals, or lyrics change
   useEffect(() => {
     setHasUnsavedChanges(trackFile !== null || vocalBuffer !== null || lyrics.length > 0 || rawLyricsText.trim() !== "");
+    return () => setHasUnsavedChanges(false);
   }, [trackFile, vocalBuffer, lyrics, rawLyricsText, setHasUnsavedChanges]);
 
   const handleJoyrideCallback = (data: EventData) => {
@@ -1078,7 +1079,7 @@ export default function KaraokeStudio() {
   if (!trackFile) {
     return (
       <div id="top" className="flex-1 overflow-y-auto bg-background font-sans scroll-smooth h-full">
-        <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-500 max-w-2xl mx-auto p-4 min-h-screen justify-center">
+        <div className="flex flex-col items-center text-center animate-in fade-in duration-300 slide-in-from-bottom-2 max-w-2xl mx-auto p-4 min-h-screen justify-center">
           <div className="flex items-center gap-6 mb-12 text-sm font-bold tracking-widest text-secondary uppercase">
             <button onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })} className="text-secondary hover:text-foreground transition-colors pb-1 flex items-center gap-2">How it works <span>↓</span></button>
           </div>
@@ -1090,7 +1091,7 @@ export default function KaraokeStudio() {
             Sing along, record your vocals, and mix them into a professional track
           </p>
 
-          <label className="px-8 py-3 rounded-full border border-edge/40 hover:bg-control cursor-pointer transition-colors text-foreground font-semibold text-sm shadow-sm backdrop-blur-sm">
+          <label className="px-8 py-3 rounded-full bg-foreground text-background hover:opacity-90 hover:scale-105 active:scale-95 cursor-pointer transition-all font-bold text-sm shadow-xl">
             Browse my files
             <input type="file" accept=".mp3,.wav,.m4a,.aac,.ogg,.mp4,.webm" className="hidden" onChange={handleTrackUpload} />
           </label>
@@ -1222,10 +1223,10 @@ export default function KaraokeStudio() {
         
         {/* LEFT SIDE: Brand & Tabs */}
         <div className="flex items-center justify-between gap-3 md:gap-6 z-10">
-          <h1 className="text-base md:text-lg font-black tracking-tighter text-foreground flex items-center gap-2">
+          <h2 className="text-base md:text-lg font-black tracking-tighter text-foreground flex items-center gap-2">
             <Mic2 className="w-5 h-5 text-foreground" />
             <span className="hidden md:inline">KARAOKE STUDIO</span><span className="inline md:hidden">KARAOKE</span><span className="sr-only"> - Free Online Vocal Recorder & Audio Mixer</span>
-          </h1>
+          </h2>
           
           <div className="hidden md:block h-6 w-px bg-control" />
           

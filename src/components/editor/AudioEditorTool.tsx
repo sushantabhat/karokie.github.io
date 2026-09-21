@@ -3,6 +3,7 @@
 import React, { useState, useRef } from "react";
 import { Upload, Play, Square, Download, Scissors, Trash2, ArrowUp, ArrowDown, Activity, CheckCircle2 } from "lucide-react";
 import { audioBufferToWav } from "@/utils/audioBufferToWav";
+import { useUnsavedChanges } from "@/providers/UnsavedChangesProvider";
 
 interface Track {
   id: string;
@@ -14,7 +15,17 @@ interface Track {
 }
 
 export default function AudioEditorTool() {
+  const { setHasUnsavedChanges } = useUnsavedChanges();
   const [tracks, setTracks] = useState<Track[]>([]);
+
+  React.useEffect(() => {
+    setHasUnsavedChanges(tracks.length > 0);
+
+    return () => {
+      setHasUnsavedChanges(false);
+    };
+  }, [tracks, setHasUnsavedChanges]);
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
@@ -160,7 +171,7 @@ export default function AudioEditorTool() {
 
   return (
     <div className="flex-1 overflow-y-auto bg-background pt-16 px-4 pb-4 md:p-8">
-      <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-500">
+      <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300 slide-in-from-bottom-2">
         
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">

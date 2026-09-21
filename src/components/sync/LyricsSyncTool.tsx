@@ -31,6 +31,7 @@ export function LyricsSyncTool() {
 
   useEffect(() => {
     setHasUnsavedChanges(trackFile !== null || lyrics.length > 0);
+    return () => setHasUnsavedChanges(false);
   }, [trackFile, lyrics, setHasUnsavedChanges]);
   const [activeLineIndex, setActiveLineIndex] = useState(0);
   const [isSyncSessionActive, setIsSyncSessionActive] = useState(false);
@@ -349,7 +350,7 @@ export function LyricsSyncTool() {
   if (!trackUrl) {
     return (
       <div className="flex-1 h-full w-full flex flex-col items-center bg-background font-sans overflow-y-auto scroll-smooth">
-        <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-500 max-w-2xl mx-auto p-4 min-h-screen justify-center">
+        <div className="flex flex-col items-center text-center animate-in fade-in duration-300 slide-in-from-bottom-2 max-w-2xl mx-auto p-4 min-h-screen justify-center">
           <div className="flex items-center gap-6 mb-12 text-sm font-bold tracking-widest text-secondary uppercase">
             <button onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })} className="text-secondary hover:text-foreground transition-colors pb-1 flex items-center gap-2">How it works <span>↓</span></button>
           </div>
@@ -361,7 +362,7 @@ export function LyricsSyncTool() {
             Sync lyrics to any audio track and export as .lrc
           </p>
 
-          <label className="px-8 py-3 rounded-full border border-edge/40 hover:bg-control cursor-pointer transition-colors text-foreground font-semibold text-sm shadow-sm backdrop-blur-sm">
+          <label className="px-8 py-3 rounded-full bg-foreground text-background hover:opacity-90 hover:scale-105 active:scale-95 cursor-pointer transition-all font-bold text-sm shadow-xl ">
             Browse my files
             <input type="file" accept=".mp3,.wav,.m4a,.aac,.ogg,.mp4,.webm" className="hidden" onChange={handleTrackUpload} />
           </label>

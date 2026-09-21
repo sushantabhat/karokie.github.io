@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Mic2, Music, CircleDot, HelpCircle, Menu, X, MessageCircle, Moon, Sun, Scissors, Link as LinkIcon, Wand2, Activity, Trash2 } from "lucide-react";
@@ -10,9 +10,17 @@ import { useUnsavedChanges } from "@/providers/UnsavedChangesProvider";
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [menuOpenPath, setMenuOpenPath] = useState<string | null>(null);
+
+  // Clear menuOpenPath if the pathname changes so it doesn't accidentally reopen on back navigation
+  useEffect(() => {
+    if (menuOpenPath !== null && menuOpenPath !== pathname) {
+      setMenuOpenPath(null);
+    }
+  }, [pathname, menuOpenPath]);
+
+  const mobileMenuOpen = menuOpenPath === pathname;
   const { theme, toggleTheme } = useTheme();
-  
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
 
   const [pendingPath, setPendingPath] = useState<string | null>(null);
@@ -52,7 +60,7 @@ export function Sidebar() {
       router.push(pendingPath);
       setShowWarning(false);
       setPendingPath(null);
-      setMobileMenuOpen(false);
+       
     }
   };
 
@@ -145,7 +153,7 @@ export function Sidebar() {
 
       {/* Mobile Hamburger Button (Floating) */}
       <button 
-        onClick={() => setMobileMenuOpen(true)}
+        onClick={() => setMenuOpenPath(pathname)}
         className="md:hidden fixed top-3 left-3 z-40 p-2 rounded-lg bg-panel border border-edge/20 shadow-sm text-foreground hover:bg-control"
       >
         <Menu className="w-6 h-6" />
@@ -153,11 +161,11 @@ export function Sidebar() {
 
       {/* Mobile Fullscreen Overlay */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-50 bg-background text-foreground flex flex-col overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+        <div className="md:hidden fixed inset-0 z-50 bg-background text-foreground flex flex-col overflow-y-auto animate-in fade-in  duration-200">
           
           {/* Overlay Header */}
           <div className="flex items-center justify-between p-4 border-b border-edge/20">
-            <button onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-control rounded-lg transition-colors">
+            <button onClick={() => setMenuOpenPath(null)} className="p-2 hover:bg-control rounded-lg transition-colors">
               <Menu className="w-6 h-6" />
             </button>
             <div className="flex items-center gap-4">
@@ -166,14 +174,14 @@ export function Sidebar() {
                 
                 if (pathname !== "/about") {
                   if (!hasUnsavedChanges) {
-                    setMobileMenuOpen(false);
+                     
                     return;
                   }
                   e.preventDefault();
                   setPendingPath("/about");
                   setShowWarning(true);
                 } else {
-                  setMobileMenuOpen(false);
+                   
                 }
               }} className="p-2 hover:bg-control rounded-lg transition-colors">
                 <HelpCircle className="w-6 h-6" />
@@ -203,14 +211,14 @@ export function Sidebar() {
                     
                     if (pathname !== tool.href) {
                       if (!hasUnsavedChanges) {
-                        setMobileMenuOpen(false);
+                         
                         return;
                       }
                       e.preventDefault();
                       setPendingPath(tool.href);
                       setShowWarning(true);
                     } else {
-                      setMobileMenuOpen(false);
+                       
                     }
                   }}
                   className={`relative flex flex-col items-center justify-center aspect-square rounded-xl transition-all

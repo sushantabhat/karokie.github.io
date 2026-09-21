@@ -23,6 +23,7 @@ export const App = () => {
 
   useEffect(() => {
     setHasUnsavedChanges(originalAudio !== null || autotonedAudio !== null);
+    return () => setHasUnsavedChanges(false);
   }, [originalAudio, autotonedAudio, setHasUnsavedChanges]);
 
   const [isUploadReady, setIsUploadReady] = useState(false);
@@ -100,7 +101,7 @@ export const App = () => {
       {!hasEnteredEditor ? (
         <div className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar w-full h-full relative z-10">
           <div className="w-full flex flex-col items-center justify-center min-h-[100dvh] pt-16">
-            <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-500 max-w-2xl mx-auto p-4">
+            <div className="flex flex-col items-center text-center animate-in fade-in duration-300 slide-in-from-bottom-2 max-w-2xl mx-auto p-4">
               <div className="flex items-center gap-6 mb-12 text-sm font-bold tracking-widest text-secondary uppercase">
                 <span className="pb-1 flex items-center gap-2">Pitch Correction</span>
               </div>
@@ -110,7 +111,7 @@ export const App = () => {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <label className={`px-8 py-3 flex items-center justify-center gap-2 rounded-full font-bold text-sm shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-opacity ${!isUploadReady ? 'bg-foreground/50 text-background/50 cursor-not-allowed' : 'bg-foreground text-background hover:opacity-90 cursor-pointer'}`}>
+                <label className={`px-8 py-3 flex items-center justify-center gap-2 rounded-full font-bold text-sm shadow-xl transition-all ${!isUploadReady ? 'bg-foreground/50 text-background/50 cursor-not-allowed' : 'bg-foreground text-background hover:opacity-90 hover:scale-105 active:scale-95 cursor-pointer'}`}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                   {!isUploadReady ? 'Loading...' : 'Browse my files'}
                   <input type="file" accept="audio/*" className="hidden" disabled={!isUploadReady} onChange={(e) => {

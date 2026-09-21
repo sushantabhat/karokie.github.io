@@ -54,6 +54,7 @@ export default function VoiceChangerTool() {
     const file = e.target.files?.[0];
     if (file) {
       setRecordedBlob(file);
+      e.currentTarget.value = "";
     }
   };
 
@@ -61,6 +62,7 @@ export default function VoiceChangerTool() {
 
   useEffect(() => {
     setHasUnsavedChanges(recordedBlob !== null);
+    return () => setHasUnsavedChanges(false);
   }, [recordedBlob, setHasUnsavedChanges]);
 
   useEffect(() => {
@@ -443,7 +445,7 @@ export default function VoiceChangerTool() {
                     />
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className="px-6 py-2.5 rounded-full bg-control hover:bg-control-hover text-foreground font-bold text-sm tracking-wide transition-colors flex items-center gap-2 border border-edge/20 shadow-sm"
+                      className="px-8 py-3 rounded-full bg-foreground text-background hover:opacity-90 hover:scale-105 active:scale-95 cursor-pointer transition-all font-bold text-sm shadow-xl flex items-center gap-2"
                     >
                       <Upload className="w-4 h-4" />
                       Upload Audio

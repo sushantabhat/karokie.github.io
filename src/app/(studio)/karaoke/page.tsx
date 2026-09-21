@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 export const metadata: Metadata = {
+  alternates: { canonical: '/karaoke' },
   title: 'Online Karaoke Studio - Record & Mix Vocals',
   description: 'Free browser-based karaoke recorder. Upload backing tracks, sync lyrics, add studio reverb to your voice, and export your final mix entirely in your browser.',
   openGraph: {

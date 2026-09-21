@@ -413,8 +413,9 @@ export default function CutterTool() {
   
   const { setHasUnsavedChanges } = useUnsavedChanges();
 
-  useEffect(() => {
+  React.useEffect(() => {
     setHasUnsavedChanges(tracks.length > 0);
+    return () => setHasUnsavedChanges(false);
   }, [tracks, setHasUnsavedChanges]);
 
   useEffect(() => {
@@ -549,7 +550,7 @@ export default function CutterTool() {
       {tracks.length === 0 ? (
         <div id="top" className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar w-full h-full relative z-10">
           <div className="w-full flex flex-col items-center justify-center min-h-[100dvh] pt-16">
-            <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-500 max-w-2xl mx-auto p-4">
+            <div className="flex flex-col items-center text-center animate-in fade-in duration-300 slide-in-from-bottom-2 max-w-2xl mx-auto p-4">
               <div className="flex items-center gap-6 mb-12 text-sm font-bold tracking-widest text-secondary uppercase">
                 <button onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })} className="text-secondary hover:text-foreground transition-colors pb-1 flex items-center gap-2">How it works <span>↓</span></button>
               </div>
@@ -561,7 +562,7 @@ export default function CutterTool() {
                 Free editor to trim, cut, and merge audio files
               </p>
 
-              <button onClick={triggerUpload} className="px-8 py-3 rounded-full border border-edge/40 hover:bg-control cursor-pointer transition-colors text-foreground font-semibold text-sm shadow-sm backdrop-blur-sm">
+              <button onClick={triggerUpload} className="px-8 py-3 rounded-full bg-foreground text-background hover:opacity-90 hover:scale-105 active:scale-95 cursor-pointer transition-all font-bold text-sm shadow-xl">
                 Browse my files
               </button>
             </div>
@@ -597,9 +598,9 @@ export default function CutterTool() {
         <div className="flex-1 flex flex-col h-full overflow-hidden">
           {/* Header ONLY visible in timeline mode. Adjusted padding for mobile sidebar hamburger */}
           <div className="w-full flex items-center justify-between px-4 pl-16 md:pl-4 py-3 bg-panel border-b border-edge/20 flex-shrink-0 relative z-20">
-            <h1 className="text-lg md:text-xl font-bold tracking-tight text-foreground flex items-center gap-2 truncate">
+            <h2 className="text-lg md:text-xl font-bold tracking-tight text-foreground flex items-center gap-2 truncate">
               <Scissors className="w-5 h-5 text-[#38bdf8] shrink-0" /> <span className="truncate">Cutter / Splitter</span>
-            </h1>
+            </h2>
           </div>
           
           {/* Vertical Timeline Area */}

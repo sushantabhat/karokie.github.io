@@ -19,6 +19,7 @@ export default function SplitterTool() {
 
   React.useEffect(() => {
     setHasUnsavedChanges(file !== null);
+    return () => setHasUnsavedChanges(false);
   }, [file, setHasUnsavedChanges]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -192,7 +193,7 @@ export default function SplitterTool() {
       <ProcessingOverlay isVisible={isProcessing} progress={progress} text="Isolating frequencies & removing vocals..." />
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
       {!file && !isProcessing && (
-        <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-500 max-w-2xl mx-auto">
+        <div className="flex flex-col items-center text-center animate-in fade-in duration-300 slide-in-from-bottom-2 max-w-2xl mx-auto">
           <div className="flex items-center gap-6 mb-12 text-sm font-bold tracking-widest text-secondary uppercase">
             <button onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })} className="text-secondary hover:text-foreground transition-colors pb-1 flex items-center gap-2">How it works <span>↓</span></button>
           </div>
@@ -207,7 +208,7 @@ export default function SplitterTool() {
             Note: Since I can't afford expensive high-end AI APIs (lol), our lightning-fast local processor purposely leaves a faint "ghost pitch" of the original artist in the background. But hey, it actually acts as a perfect guide to help you stay on key while singing!
           </p>
 
-          <label className="px-8 py-3 rounded-full border border-edge/40 hover:bg-control cursor-pointer transition-colors text-foreground font-semibold text-sm shadow-sm backdrop-blur-sm">
+          <label className="px-8 py-3 rounded-full bg-foreground text-background hover:opacity-90 hover:scale-105 active:scale-95 cursor-pointer transition-all font-bold text-sm shadow-xl">
             Browse my files
             <input type="file" accept=".mp3,.wav,.m4a,.aac,.ogg" className="hidden" onChange={(e) => {
               handleUpload(e);
@@ -223,10 +224,10 @@ export default function SplitterTool() {
       )}
 
       {file && !isProcessing && !instrumentalUrl && (
-        <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-500 max-w-2xl mx-auto">
-          <h1 className="text-3xl font-black tracking-tight mb-4 text-foreground">
+        <div className="flex flex-col items-center text-center animate-in fade-in duration-300 slide-in-from-bottom-2 max-w-2xl mx-auto">
+          <h2 className="text-3xl font-black tracking-tight mb-4 text-foreground">
             Ready to split
-          </h1>
+          </h2>
           <p className="text-secondary mb-8">{file.name}</p>
           <button
             onClick={processAudio}

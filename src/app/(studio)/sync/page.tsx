@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 export const metadata: Metadata = {
+  alternates: { canonical: '/sync' },
   title: 'LRC Maker - Sync Lyrics to Audio',
   description: 'Create perfectly timed .LRC files for your songs. Upload audio, paste lyrics, and tap to sync lines precisely with the music.',
   openGraph: {

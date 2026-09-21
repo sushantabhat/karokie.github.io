@@ -26,11 +26,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Enforce the theme attribute. Next.js navigation can sometimes cause React to 
+  // re-render the RootLayout and overwrite the <html> data-theme back to the hardcoded "dark" default.
+  // This effect ensures our client state always wins.
+  useEffect(() => {
+    if (mounted) {
+      document.documentElement.setAttribute("data-theme", theme);
+    }
+  }, [theme, mounted]);
+
   const toggleTheme = () => {
     const newTheme = theme === "dark" ? "light" : "dark";
     setTheme(newTheme);
     localStorage.setItem("karaokeTheme_v2", newTheme);
-    document.documentElement.setAttribute("data-theme", newTheme);
   };
 
   // Prevent flash by hiding children until theme is loaded (or just render with default)
