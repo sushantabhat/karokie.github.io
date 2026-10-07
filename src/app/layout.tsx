@@ -38,12 +38,33 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Karaoke Studio",
+    "operatingSystem": "Web Browser",
+    "applicationCategory": "MultimediaApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "Free online karaoke maker, vocal remover, audio cutter, and voice changer. Create instrumental tracks and sing along directly in your browser with zero installation.",
+    "url": "https://www.karaokestudio.me"
+  };
+
   return (
     <html
       lang="en"
       className="h-full antialiased min-h-screen m-0 p-0" 
       suppressHydrationWarning
     >
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className="min-h-full flex flex-col relative bg-background text-foreground m-0 p-0">
         <ThemeProvider>
           {children}
