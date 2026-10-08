@@ -66,7 +66,7 @@ export default function VoiceChangerTool() {
   }, [recordedBlob, setHasUnsavedChanges]);
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
     return () => {
       if (audioContextRef.current?.state !== 'closed') {

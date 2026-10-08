@@ -102,7 +102,7 @@ export const Settings = ({
 };
 
 const powerOfTwos = (smallExponent, bigExponent: any) => {
-  let values = [];
+  const values = [];
   for (let i = smallExponent; i <= bigExponent; i++) {
     values.push(Math.pow(2, i));
   }

@@ -3,7 +3,7 @@ import { createWebWorkerReceiver } from '@/lib/autotone/utils/webWorkerUtils';
 import * as tuner from './tunerApi';
 import * as constants from './tunerConstants';
 
-/* eslint-disable no-restricted-globals */
+ 
 self.onmessage = createWebWorkerReceiver(self.postMessage, [
   {
     key: constants.TUNER_INIT,
@@ -26,4 +26,4 @@ self.onmessage = createWebWorkerReceiver(self.postMessage, [
     fn: tuner.pitchShift,
   },
 ]);
-/* eslint-enable no-restricted-globals */
+ 

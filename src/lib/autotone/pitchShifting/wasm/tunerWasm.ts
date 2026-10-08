@@ -4,13 +4,13 @@
 
 // Single threaded MINIMAL_RUNTIME programs do not need access to
 // document.currentScript, so a simple export declaration is enough.
-var Module = (() => {
+const Module = (() => {
   // When MODULARIZE this JS may be executed later,
   // after document.currentScript is gone, so we save it.
   // In EXPORT_ES6 mode we can just use 'import.meta.url'.
-  var _scriptName = globalThis.document?.currentScript?.src;
+  const _scriptName = globalThis.document?.currentScript?.src;
   return async function(moduleArg = {}) {
-    var Module = moduleArg;
+    const Module = moduleArg;
 // include: shell.js
 // include: minimum_runtime_check.js
 // end include: minimum_runtime_check.js
@@ -31,23 +31,23 @@ var Module = (() => {
 // Determine the runtime environment we are in. You can customize this by
 // setting the ENVIRONMENT setting at compile time (see settings.js).
 
-var ENVIRONMENT_IS_WEB = true;
-var ENVIRONMENT_IS_WORKER = false;
-var ENVIRONMENT_IS_NODE = false;
-var ENVIRONMENT_IS_SHELL = false;
+const ENVIRONMENT_IS_WEB = true;
+const ENVIRONMENT_IS_WORKER = false;
+const ENVIRONMENT_IS_NODE = false;
+const ENVIRONMENT_IS_SHELL = false;
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
 
 
-var programArgs = [];
-var thisProgram = './this.program';
-var quit_ = (status, toThrow) => {
+let programArgs = [];
+let thisProgram = './this.program';
+const quit_ = (status, toThrow) => {
   throw toThrow;
 };
 
 // `/` should be present at the end if `scriptDirectory` is not empty
-var scriptDirectory = '';
+let scriptDirectory = '';
 function locateFile(path) {
   if (Module['locateFile']) {
     return Module['locateFile'](path, scriptDirectory);
@@ -56,7 +56,7 @@ function locateFile(path) {
 }
 
 // Hooks that are implemented differently in different runtime environments.
-var readAsync, readBinary;
+let readAsync, readBinary;
 
 // Note that this includes Node.js workers when relevant (pthreads is enabled).
 // Node.js workers are detected as a combination of ENVIRONMENT_IS_WORKER and
@@ -72,7 +72,7 @@ if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
   {
 // include: web_or_worker_shell_read.js
 readAsync = async (url) => {
-    var response = await fetch(url, { credentials: 'same-origin' });
+    const response = await fetch(url, { credentials: 'same-origin' });
     if (response.ok) {
       return response.arrayBuffer();
     }
@@ -84,8 +84,8 @@ readAsync = async (url) => {
 {
 }
 
-var out = console.log.bind(console);
-var err = console.error.bind(console);
+let out = console.log.bind(console);
+let err = console.error.bind(console);
 
 // end include: shell.js
 
@@ -100,7 +100,7 @@ var err = console.error.bind(console);
 // An online HTML version (which may be of a different version of Emscripten)
 //    is up at http://kripken.github.io/emscripten-site/docs/api_reference/preamble.js.html
 
-var wasmBinary;
+let wasmBinary;
 
 // Wasm globals
 
@@ -110,12 +110,12 @@ var wasmBinary;
 
 // whether we are quitting the application. no code should run after this.
 // set in exit() and abort()
-var ABORT = false;
+let ABORT = false;
 
 // set by exit() and abort().  Passed to 'onExit' handler.
 // NOTE: This is also used as the process return code in shell environments
 // but only when noExitRuntime is false.
-var EXITSTATUS;
+let EXITSTATUS;
 
 // In STRICT mode, we only define assert() when ASSERTIONS is set.  i.e. we
 // don't define it at all in release modes.  This matches the behaviour of
@@ -135,7 +135,7 @@ function assert(condition, text) {
  * Indicates whether filename is delivered via file protocol (as opposed to http/https)
  * @noinline
  */
-var isFileURI = (filename) => filename.startsWith('file://');
+const isFileURI = (filename) => filename.startsWith('file://');
 
 // include: runtime_common.js
 // include: runtime_exceptions.js
@@ -149,7 +149,7 @@ class EmscriptenSjLj extends EmscriptenEH {}
 // end include: runtime_debug.js
 // Memory management
 
-var runtimeInitialized = false;
+let runtimeInitialized = false;
 
 
 
@@ -163,7 +163,7 @@ function updateMemoryViews() {
   // If we already have a heap that is resizeable/growable buffer we don't
   // need to do anything in updateMemoryViews.
   if (HEAP8?.buffer?.resizable) return;
-  var b = getMemoryBuffer();
+  const b = getMemoryBuffer();
   HEAP8 = new Int8Array(b);
   HEAP16 = new Int16Array(b);
   HEAPU8 = new Uint8Array(b);
@@ -180,7 +180,7 @@ function updateMemoryViews() {
 // end include: memoryprofiler.js
 // end include: runtime_common.js
 function preRun() {
-  var preRun = Module['preRun'];
+  let preRun = Module['preRun'];
   if (preRun) {
     if (typeof preRun == 'function') preRun = [preRun];
     onPreRuns.push(...preRun);
@@ -203,7 +203,7 @@ function initRuntime() {
 
 function postRun() {
 
-  var postRun = Module['postRun'];
+  let postRun = Module['postRun'];
   if (postRun) {
     if (typeof postRun == 'function') postRun = [postRun];
     onPostRuns.push(...postRun);
@@ -243,7 +243,7 @@ function abort(what) {
   // though it can.
   // TODO(https://github.com/google/closure-compiler/pull/3913): Remove if/when upstream closure gets fixed.
   /** @suppress {checkTypes} */
-  var e = new WebAssembly.RuntimeError(what);
+  const e = new WebAssembly.RuntimeError(what);
 
   // Throw the error whether or not MODULARIZE is set because abort is used
   // in code paths apart from instantiation where an exception is expected
@@ -251,7 +251,7 @@ function abort(what) {
   throw e;
 }
 
-var wasmBinaryFile;
+let wasmBinaryFile;
 
 function findWasmBinary() {
   return locateFile('tunerWasm.wasm');
@@ -271,7 +271,7 @@ async function getWasmBinary(binaryFile) {
   if (!wasmBinary) {
     // Fetch the binary using readAsync
     try {
-      var response = await readAsync(binaryFile);
+      const response = await readAsync(binaryFile);
       return new Uint8Array(response);
     } catch {
       // Fall back to getBinarySync below;
@@ -284,8 +284,8 @@ async function getWasmBinary(binaryFile) {
 
 async function instantiateArrayBuffer(binaryFile, imports) {
   try {
-    var binary = await getWasmBinary(binaryFile);
-    var instance = await WebAssembly.instantiate(binary, imports);
+    const binary = await getWasmBinary(binaryFile);
+    const instance = await WebAssembly.instantiate(binary, imports);
     return instance;
   } catch (reason) {
     err(`failed to asynchronously prepare wasm: ${reason}`);
@@ -298,8 +298,8 @@ async function instantiateAsync(binary, binaryFile, imports) {
   if (!binary
      ) {
     try {
-      var response = fetch(binaryFile, { credentials: 'same-origin' });
-      var instantiationResult = await WebAssembly.instantiateStreaming(response, imports);
+      const response = fetch(binaryFile, { credentials: 'same-origin' });
+      const instantiationResult = await WebAssembly.instantiateStreaming(response, imports);
       return instantiationResult;
     } catch (reason) {
       // We expect the most common failure cause to be a bad MIME type for the binary,
@@ -314,7 +314,7 @@ async function instantiateAsync(binary, binaryFile, imports) {
 
 function getWasmImports() {
   // prepare imports
-  var imports = {
+  const imports = {
     'env': wasmImports,
     'wasi_snapshot_preview1': wasmImports,
   };
@@ -346,7 +346,7 @@ async function createWasm() {
     return receiveInstance(result['instance']);
   }
 
-  var info = getWasmImports();
+  const info = getWasmImports();
 
   // User shell pages can write their own Module.instantiateWasm = function(imports, successCallback) callback
   // to manually instantiate the Wasm module themselves. This allows pages to
@@ -354,7 +354,7 @@ async function createWasm() {
   // performing.
   // Also pthreads and wasm workers initialize the wasm instance through this
   // path.
-  var instantiateWasm = Module['instantiateWasm'];
+  const instantiateWasm = Module['instantiateWasm'];
   if (instantiateWasm) {
     return new Promise((resolve) => {
         instantiateWasm(info, (inst) => resolve(receiveInstance(inst)));
@@ -362,8 +362,8 @@ async function createWasm() {
   }
 
   wasmBinaryFile ??= findWasmBinary();
-  var result = await instantiateAsync(wasmBinary, wasmBinaryFile, info);
-  var exports = receiveInstantiationResult(result);
+  const result = await instantiateAsync(wasmBinary, wasmBinaryFile, info);
+  const exports = receiveInstantiationResult(result);
   return exports;
 }
 
@@ -381,7 +381,7 @@ async function createWasm() {
     }
 
   /** @type {!Int8Array} */
-  var HEAP8;
+  let HEAP8;
 
   var callRuntimeCallbacks = (callbacks) => {
       while (callbacks.length > 0) {
@@ -390,34 +390,34 @@ async function createWasm() {
       }
     };
   var onPostRuns = [];
-  var addOnPostRun = (cb) => onPostRuns.push(cb);
+  const addOnPostRun = (cb) => onPostRuns.push(cb);
 
   var onPreRuns = [];
-  var addOnPreRun = (cb) => onPreRuns.push(cb);
+  const addOnPreRun = (cb) => onPreRuns.push(cb);
 
 
-  var noExitRuntime = true;
+  let noExitRuntime = true;
 
-  var stackRestore = (val) => __emscripten_stack_restore(val);
+  const stackRestore = (val) => __emscripten_stack_restore(val);
 
-  var stackSave = () => _emscripten_stack_get_current();
+  const stackSave = () => _emscripten_stack_get_current();
 
   
 
-  var getHeapMax = () =>
+  const getHeapMax = () =>
       // Stay one Wasm page short of 4GB: while e.g. Chrome is able to allocate
       // full 4GB Wasm memories, the size will wrap back to 0 bytes in Wasm side
       // for any code that deals with heap sizes, which would require special
       // casing all heap size related code to treat 0 specially.
       2147483648;
   
-  var alignMemory = (size, alignment) => {
+  const alignMemory = (size, alignment) => {
       return Math.ceil(size / alignment) * alignment;
     };
   
-  var growMemory = (size) => {
-      var oldHeapSize = wasmMemory.buffer.byteLength;
-      var pages = ((size - oldHeapSize + 65535) / 65536) | 0;
+  const growMemory = (size) => {
+      const oldHeapSize = wasmMemory.buffer.byteLength;
+      const pages = ((size - oldHeapSize + 65535) / 65536) | 0;
       try {
         // round size grow request up to wasm page size (fixed 64KB per spec)
         wasmMemory.grow(pages); // .grow() takes a delta compared to the previous size
@@ -430,9 +430,9 @@ async function createWasm() {
     };
   
   /** @type {!Uint8Array} */
-  var HEAPU8;
-  var _emscripten_resize_heap = (requestedSize) => {
-      var oldSize = HEAPU8.length;
+  let HEAPU8;
+  const _emscripten_resize_heap = (requestedSize) => {
+      const oldSize = HEAPU8.length;
       // With CAN_ADDRESS_2GB or MEMORY64, pointers are already unsigned.
       requestedSize >>>= 0;
       // With multithreaded builds, races can happen (another thread might increase the size
@@ -457,7 +457,7 @@ async function createWasm() {
   
       // A limit is set for how much we can grow. We should not exceed that
       // (the wasm binary specifies it, so if we tried, we'd fail anyhow).
-      var maxHeapSize = getHeapMax();
+      const maxHeapSize = getHeapMax();
       if (requestedSize > maxHeapSize) {
         return false;
       }
@@ -465,14 +465,14 @@ async function createWasm() {
       // Loop through potential heap size increases. If we attempt a too eager
       // reservation that fails, cut down on the attempted size and reserve a
       // smaller bump instead. (max 3 times, chosen somewhat arbitrarily)
-      for (var cutDown = 1; cutDown <= 4; cutDown *= 2) {
-        var overGrownHeapSize = oldSize * (1 + 0.2 / cutDown); // ensure geometric growth
+      for (let cutDown = 1; cutDown <= 4; cutDown *= 2) {
+        let overGrownHeapSize = oldSize * (1 + 0.2 / cutDown); // ensure geometric growth
         // but limit overreserving (default to capping at +96MB overgrowth at most)
         overGrownHeapSize = Math.min(overGrownHeapSize, requestedSize + 100663296 );
   
-        var newSize = Math.min(maxHeapSize, alignMemory(Math.max(requestedSize, overGrownHeapSize), 65536));
+        const newSize = Math.min(maxHeapSize, alignMemory(Math.max(requestedSize, overGrownHeapSize), 65536));
   
-        var replacement = growMemory(newSize);
+        const replacement = growMemory(newSize);
         if (replacement) {
   
           return true;
@@ -482,9 +482,9 @@ async function createWasm() {
     };
 
   
-  var runtimeKeepaliveCounter = 0;
-  var keepRuntimeAlive = () => noExitRuntime || runtimeKeepaliveCounter > 0;
-  var _proc_exit = (code) => {
+  const runtimeKeepaliveCounter = 0;
+  const keepRuntimeAlive = () => noExitRuntime || runtimeKeepaliveCounter > 0;
+  const _proc_exit = (code) => {
       EXITSTATUS = code;
       if (!keepRuntimeAlive()) {
         Module['onExit']?.(code);
@@ -493,21 +493,21 @@ async function createWasm() {
       quit_(code, new ExitStatus(code));
     };
   /** @param {boolean|number=} implicit */
-  var exitJS = (status, implicit) => {
+  const exitJS = (status, implicit) => {
       EXITSTATUS = status;
   
       _proc_exit(status);
     };
-  var _exit = exitJS;
+  const _exit = exitJS;
 
-  var _fd_close = (fd) => {
+  const _fd_close = (fd) => {
       return 52;
     };
 
-  var INT53_MAX = 9007199254740992;
+  const INT53_MAX = 9007199254740992;
   
-  var INT53_MIN = -9007199254740992;
-  var bigintToI53Checked = (num) => (num < INT53_MIN || num > INT53_MAX) ? NaN : Number(num);
+  const INT53_MIN = -9007199254740992;
+  const bigintToI53Checked = (num) => (num < INT53_MIN || num > INT53_MAX) ? NaN : Number(num);
   function _fd_seek(fd, offset, whence, newOffset) {
     offset = bigintToI53Checked(offset);
   
@@ -516,9 +516,9 @@ async function createWasm() {
     ;
   }
 
-  var printCharBuffers = [null,[],[]];
+  const printCharBuffers = [null,[],[]];
   
-  var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
+  const UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   
   
     /**
@@ -528,8 +528,8 @@ async function createWasm() {
    * @param {boolean=} ignoreNul
    * @return {number}
    */
-  var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
-      var maxIdx = idx + maxBytesToRead;
+  const findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
+      const maxIdx = idx + maxBytesToRead;
       if (ignoreNul) return maxIdx;
       // TextDecoder needs to know the byte length in advance, it doesn't stop on
       // null terminator by itself.
@@ -549,25 +549,25 @@ async function createWasm() {
    * @param {boolean=} ignoreNul - If true, the function will not stop on a NUL character.
    * @return {string}
    */
-  var UTF8ArrayToString = (heapOrArray, idx = 0, maxBytesToRead, ignoreNul) => {
+  const UTF8ArrayToString = (heapOrArray, idx = 0, maxBytesToRead, ignoreNul) => {
   
-      var endPtr = findStringEnd(heapOrArray, idx, maxBytesToRead, ignoreNul);
+      const endPtr = findStringEnd(heapOrArray, idx, maxBytesToRead, ignoreNul);
   
       // When using conditional TextDecoder, skip it for short strings as the overhead of the native call is not worth it.
       if (endPtr - idx > 16 && heapOrArray.buffer && UTF8Decoder) {
         return UTF8Decoder.decode(heapOrArray.subarray(idx, endPtr));
       }
-      var str = '';
+      let str = '';
       while (idx < endPtr) {
         // For UTF8 byte structure, see:
         // http://en.wikipedia.org/wiki/UTF-8#Description
         // https://www.ietf.org/rfc/rfc2279.txt
         // https://tools.ietf.org/html/rfc3629
-        var u0 = heapOrArray[idx++];
+        let u0 = heapOrArray[idx++];
         if (!(u0 & 0x80)) { str += String.fromCharCode(u0); continue; }
-        var u1 = heapOrArray[idx++] & 63;
+        const u1 = heapOrArray[idx++] & 63;
         if ((u0 & 0xE0) == 0xC0) { str += String.fromCharCode(((u0 & 31) << 6) | u1); continue; }
-        var u2 = heapOrArray[idx++] & 63;
+        const u2 = heapOrArray[idx++] & 63;
         if ((u0 & 0xF0) == 0xE0) {
           u0 = ((u0 & 15) << 12) | (u1 << 6) | u2;
         } else {
@@ -577,14 +577,14 @@ async function createWasm() {
         if (u0 < 0x10000) {
           str += String.fromCharCode(u0);
         } else {
-          var ch = u0 - 0x10000;
+          const ch = u0 - 0x10000;
           str += String.fromCharCode(0xD800 | (ch >> 10), 0xDC00 | (ch & 0x3FF));
         }
       }
       return str;
     };
-  var printChar = (stream, curr) => {
-      var buffer = printCharBuffers[stream];
+  const printChar = (stream, curr) => {
+      const buffer = printCharBuffers[stream];
       if (!curr || curr === 10) {
         (stream === 1 ? out : err)(UTF8ArrayToString(buffer));
         buffer.length = 0;
@@ -593,7 +593,7 @@ async function createWasm() {
       }
     };
   
-  var flush_NO_FILESYSTEM = () => {
+  const flush_NO_FILESYSTEM = () => {
       // flush anything remaining in the buffers during shutdown
       if (printCharBuffers[1].length) printChar(1, 10);
       if (printCharBuffers[2].length) printChar(2, 10);
@@ -615,28 +615,28 @@ async function createWasm() {
    * @param {boolean=} ignoreNul - If true, the function will not stop on a NUL character.
    * @return {string}
    */
-  var UTF8ToString = (ptr, maxBytesToRead, ignoreNul) => {
+  const UTF8ToString = (ptr, maxBytesToRead, ignoreNul) => {
       return ptr ? UTF8ArrayToString(HEAPU8, ptr, maxBytesToRead, ignoreNul) : '';
     };
-  var SYSCALLS = {
+  const SYSCALLS = {
   varargs:undefined,
   getStr(ptr) {
-        var ret = UTF8ToString(ptr);
+        const ret = UTF8ToString(ptr);
         return ret;
       },
   };
   
   
   /** @type {!Uint32Array} */
-  var HEAPU32;
-  var _fd_write = (fd, iov, iovcnt, pnum) => {
+  let HEAPU32;
+  const _fd_write = (fd, iov, iovcnt, pnum) => {
       // hack to support printf in SYSCALLS_REQUIRE_FILESYSTEM=0
-      var num = 0;
-      for (var i = 0; i < iovcnt; i++) {
-        var ptr = HEAPU32[((iov)>>2)];
-        var len = HEAPU32[(((iov)+(4))>>2)];
+      let num = 0;
+      for (let i = 0; i < iovcnt; i++) {
+        const ptr = HEAPU32[((iov)>>2)];
+        const len = HEAPU32[(((iov)+(4))>>2)];
         iov += 8;
-        for (var j = 0; j < len; j++) {
+        for (let j = 0; j < len; j++) {
           printChar(fd, HEAPU8[ptr+j]);
         }
         num += len;
@@ -645,23 +645,23 @@ async function createWasm() {
       return 0;
     };
 
-  var getCFunc = (ident) => {
-      var func = Module['_' + ident]; // closure exported function
+  const getCFunc = (ident) => {
+      const func = Module['_' + ident]; // closure exported function
       return func;
     };
   
-  var writeArrayToMemory = (array, buffer) => {
+  const writeArrayToMemory = (array, buffer) => {
       HEAP8.set(array, buffer);
     };
   
-  var lengthBytesUTF8 = (str) => {
-      var len = 0;
-      for (var i = 0; i < str.length; ++i) {
+  const lengthBytesUTF8 = (str) => {
+      let len = 0;
+      for (let i = 0; i < str.length; ++i) {
         // Gotcha: charCodeAt returns a 16-bit word that is a UTF-16 encoded code
         // unit, not a Unicode code point of the character! So decode
         // UTF16->UTF32->UTF8.
         // See http://unicode.org/faq/utf_bom.html#utf16-3
-        var c = str.charCodeAt(i); // possibly a lead surrogate
+        const c = str.charCodeAt(i); // possibly a lead surrogate
         if (c <= 0x7F) {
           len++;
         } else if (c <= 0x7FF) {
@@ -675,19 +675,19 @@ async function createWasm() {
       return len;
     };
   
-  var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
+  const stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
       // Parameter maxBytesToWrite is not optional. Negative values, 0, null,
       // undefined and false each don't write out any bytes.
       if (!(maxBytesToWrite > 0))
         return 0;
   
-      var startIdx = outIdx;
-      var endIdx = outIdx + maxBytesToWrite - 1; // -1 for string null terminator.
-      for (var i = 0; i < str.length; ++i) {
+      const startIdx = outIdx;
+      const endIdx = outIdx + maxBytesToWrite - 1; // -1 for string null terminator.
+      for (let i = 0; i < str.length; ++i) {
         // For UTF8 byte structure, see http://en.wikipedia.org/wiki/UTF-8#Description
         // and https://www.ietf.org/rfc/rfc2279.txt
         // and https://tools.ietf.org/html/rfc3629
-        var u = str.codePointAt(i);
+        const u = str.codePointAt(i);
         if (u <= 0x7F) {
           if (outIdx >= endIdx) break;
           heap[outIdx++] = u;
@@ -716,14 +716,14 @@ async function createWasm() {
       return outIdx - startIdx;
     };
   
-  var stringToUTF8 = (str, outPtr, maxBytesToWrite) => {
+  const stringToUTF8 = (str, outPtr, maxBytesToWrite) => {
       return stringToUTF8Array(str, HEAPU8, outPtr, maxBytesToWrite);
     };
   
-  var stackAlloc = (sz) => __emscripten_stack_alloc(sz);
-  var stringToUTF8OnStack = (str) => {
-      var size = lengthBytesUTF8(str) + 1;
-      var ret = stackAlloc(size);
+  const stackAlloc = (sz) => __emscripten_stack_alloc(sz);
+  const stringToUTF8OnStack = (str) => {
+      const size = lengthBytesUTF8(str) + 1;
+      const ret = stackAlloc(size);
       stringToUTF8(str, ret, size);
       return ret;
     };
@@ -738,18 +738,18 @@ async function createWasm() {
    * @param {Array=} args
    * @param {Object=} opts
    */
-  var ccall = (ident, returnType, argTypes, args, opts) => {
+  const ccall = (ident, returnType, argTypes, args, opts) => {
       // For fast lookup of conversion functions
-      var toC = {
+      const toC = {
         'string': (str) => {
-          var ret = 0;
+          let ret = 0;
           if (str !== null && str !== undefined && str !== 0) { // null string
             ret = stringToUTF8OnStack(str);
           }
           return ret;
         },
         'array': (arr) => {
-          var ret = stackAlloc(arr.length);
+          const ret = stackAlloc(arr.length);
           writeArrayToMemory(arr, ret);
           return ret;
         }
@@ -763,12 +763,12 @@ async function createWasm() {
         return ret;
       }
   
-      var func = getCFunc(ident);
-      var cArgs = [];
-      var stack = 0;
+      const func = getCFunc(ident);
+      const cArgs = [];
+      let stack = 0;
       if (args) {
-        for (var i = 0; i < args.length; i++) {
-          var converter = toC[argTypes[i]];
+        for (let i = 0; i < args.length; i++) {
+          const converter = toC[argTypes[i]];
           if (converter) {
             if (!stack) stack = stackSave();
             cArgs[i] = converter(args[i]);
@@ -777,7 +777,7 @@ async function createWasm() {
           }
         }
       }
-      var ret = func(...cArgs);
+      let ret = func(...cArgs);
       function onDone(ret) {
         if (stack) stackRestore(stack);
         return convertReturnValue(ret);
@@ -794,11 +794,11 @@ async function createWasm() {
    * @param {Array=} argTypes
    * @param {Object=} opts
    */
-  var cwrap = (ident, returnType, argTypes, opts) => {
+  const cwrap = (ident, returnType, argTypes, opts) => {
       // When the function takes numbers and returns a number, we can just return
       // the original function
-      var numericArgs = !argTypes || argTypes.every((type) => type === 'number' || type === 'boolean');
-      var numericRet = returnType !== 'string';
+      const numericArgs = !argTypes || argTypes.every((type) => type === 'number' || type === 'boolean');
+      const numericRet = returnType !== 'string';
       if (numericRet && numericArgs && !opts) {
         return getCFunc(ident);
       }
@@ -807,20 +807,20 @@ async function createWasm() {
 
   
   /** @type {!Int16Array} */
-  var HEAP16;
+  let HEAP16;
   
   /** @type {!Int32Array} */
-  var HEAP32;
+  let HEAP32;
   
   
   /** @type {!Float32Array} */
-  var HEAPF32;
+  let HEAPF32;
   
   /** @type {!Float64Array} */
-  var HEAPF64;
+  let HEAPF64;
   
   /** not-@type {!BigInt64Array} */
-  var HEAP64;
+  let HEAP64;
   
     /**
    * @param {number} ptr
@@ -884,7 +884,7 @@ if (Module['printErr']) err = Module['printErr'];
   if (Module['arguments']) programArgs = Module['arguments'];
   if (Module['thisProgram']) thisProgram = Module['thisProgram'];
 
-  var preInit = Module['preInit'];
+  let preInit = Module['preInit'];
   if (preInit) {
     if (typeof preInit == 'function') Module['preInit'] = preInit = [preInit];
     // Written as a loop so that preInit functions that themselves add more
@@ -908,7 +908,7 @@ if (Module['printErr']) err = Module['printErr'];
 
 
 // Imports from the Wasm binary.
-var _resample_linear,
+let _resample_linear,
   _pitch_snap,
   _pitch_shift,
   _get_num_windows,
@@ -957,7 +957,7 @@ async function run() {
 
   preRun();
 
-  var setStatus = Module['setStatus'];
+  const setStatus = Module['setStatus'];
   if (setStatus) {
     setStatus('Running...');
     // Yield to the event loop to allow the browser to paint "Running..."
@@ -975,7 +975,7 @@ async function run() {
   postRun();
 }
 
-var wasmExports;
+let wasmExports;
 
 // In modularize mode the generated code is within a factory function so we
 // can use await here (since it's not top-level-await).
