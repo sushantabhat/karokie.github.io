@@ -36,6 +36,7 @@ export function Sidebar() {
 
   const bottomLinks = [
     { name: "About", href: "/about", icon: HelpCircle },
+    { name: "Blog", href: "/blog", icon: LinkIcon },
     { name: "Discord", href: "https://discord.gg/PG4ePQWTDh", icon: MessageCircle, external: true },
   ];
 

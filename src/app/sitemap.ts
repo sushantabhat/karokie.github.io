@@ -59,5 +59,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.5,
     },
+    {
+      url: `${baseUrl}/blog`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/blog/how-to-remove-vocals`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.9, // high priority for long-tail
+    },
   ];
 }
